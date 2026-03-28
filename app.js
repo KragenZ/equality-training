@@ -750,9 +750,14 @@ function copyQuick(cmd) {
 // ---- Elite Pro: Roster ----
 let _roster = JSON.parse(localStorage.getItem('roster_data')) || [];
 
-async function processRosterOCR(e) {
+function processRosterOCR(e) {
   const file = e.target.files[0];
   if (!file) return;
+  processRosterOCRFile(file);
+  e.target.value = '';
+}
+
+async function processRosterOCRFile(file) {
   const btn = document.getElementById('btn-ocr');
   const ogText = btn.innerHTML;
   btn.innerHTML = '⏳ Scanning Image...';
@@ -802,7 +807,6 @@ async function processRosterOCR(e) {
   } finally {
     btn.innerHTML = ogText;
     btn.disabled = false;
-    e.target.value = '';
   }
 }
 
@@ -1229,6 +1233,22 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAnalytics();
   initVoidCanvas();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
+
+  // OCR Paste Event Listener
+  const rosterInput = document.getElementById('roster-input');
+  if (rosterInput) {
+    rosterInput.addEventListener('paste', (e) => {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (let index in items) {
+        const item = items[index];
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          e.preventDefault(); // Prevent default text dump
+          processRosterOCRFile(item.getAsFile());
+          return;
+        }
+      }
+    });
+  }
 });
 
 // ---- Elite Pro: Void Particles ----
