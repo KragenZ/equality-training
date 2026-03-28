@@ -661,9 +661,10 @@ function initRoster() {
   const raw = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
   if (raw.length === 0) return;
   
-  _roster = raw.map(name => ({ name, status: 'active' }));
+  _roster = raw.map(name => ({ name, status: 'active', strikes: 0 }));
   saveRoster();
   renderRoster();
+  updateAnalytics();
   input.value = '';
   showToast(`Imported ${raw.length} players!`);
 }
@@ -680,9 +681,14 @@ function renderRoster() {
 
   _roster.forEach((p, i) => {
     const item = document.createElement('div');
-    item.className = 'roster-item';
+    item.className = 'roster-item' + (p.strikes >= 2 ? ' at-risk' : '');
     item.innerHTML = `
       <div class="roster-name">${escHTML(p.name)}</div>
+      <div class="strike-container">
+        <button class="btn-strike ${p.strikes > 0 ? 'active' : ''}" onclick="addStrike(${i})">
+          ⚠️ Strike <span class="strike-count">${p.strikes}/2</span>
+        </button>
+      </div>
       <div class="status-btns">
         <button class="btn-status ${p.status==='active'?'active-status':''}" onclick="setRosterStatus(${i},'active')">Active</button>
         <button class="btn-status ${p.status==='failed'?'failed-status':''}" onclick="setRosterStatus(${i},'failed')">Failed</button>
@@ -691,6 +697,20 @@ function renderRoster() {
     `;
     list.appendChild(item);
   });
+}
+
+function addStrike(idx) {
+  const p = _roster[idx];
+  p.strikes = (p.strikes + 1) % 3; // 0 -> 1 -> 2 -> 0
+
+  saveRoster();
+  renderRoster();
+
+  if (p.strikes === 1) showToast(`${p.name} given Strike 1.`);
+  if (p.strikes === 2) {
+    showToast(`Strike 2! Removal triggered for ${p.name}.`);
+    copyQuick(`!PSKICK ${p.name}`);
+  }
 }
 
 function setRosterStatus(idx, status) {
@@ -704,6 +724,7 @@ function generateTrainingReport() {
   if (_roster.length === 0) { showToast('Roster is empty!'); return; }
   const active = _roster.filter(p => p.status === 'active').map(p => p.name);
   const failed = _roster.filter(p => p.status === 'failed').map(p => p.name);
+  const disciplined = _roster.filter(p => p.strikes > 0).map(p => `${p.name} (${p.strikes} Strikes)`);
   
   const h = Math.floor(_seconds / 3600);
   const m = Math.floor((_seconds % 3600) / 60);
@@ -713,6 +734,7 @@ function generateTrainingReport() {
     `⏱ **Duration:** ${h}h ${m}m`,
     `✅ **Survivors (${active.length}):** ${active.join(', ') || 'None'}`,
     `❌ **Failed (${failed.length}):** ${failed.join(', ') || 'None'}`,
+    `⚠️ **Disciplined (${disciplined.length}):** ${disciplined.join(', ') || 'None'}`,
     `🏆 **Congratulations to all survivors!**`
   ].join('\n');
   
