@@ -764,8 +764,41 @@ async function processRosterOCRFile(file) {
   btn.disabled = true;
 
   try {
+    // ---- Image Pre-processing for Tesseract ----
+    // Roblox uses Cyan text on Dark Gray. Tesseract needs Black text on White bg.
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    await new Promise(r => img.onload = r);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const brightness = Math.max(r, g, b);
+      
+      // The background is usually ~30-50. The text is >120. 
+      // If bright enough, force to pitch Black text. Else force pure White bg.
+      if (brightness > 90) { 
+        data[i] = 0; data[i+1] = 0; data[i+2] = 0;
+      } else {
+        data[i] = 255; data[i+1] = 255; data[i+2] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    const processedUrl = canvas.toDataURL('image/png');
+    URL.revokeObjectURL(url);
+    // ------------------------------------------
+
     const worker = await Tesseract.createWorker('eng');
-    const ret = await worker.recognize(file);
+    const ret = await worker.recognize(processedUrl);
     await worker.terminate();
 
     const lines = ret.data.text.split('\n');
