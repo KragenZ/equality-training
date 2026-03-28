@@ -797,9 +797,7 @@ async function processRosterOCRFile(file) {
     URL.revokeObjectURL(url);
     // ------------------------------------------
 
-    const worker = await Tesseract.createWorker('eng');
-    const ret = await worker.recognize(processedUrl);
-    await worker.terminate();
+    const ret = await Tesseract.recognize(processedUrl, 'eng');
 
     const lines = ret.data.text.split('\n');
     let names = [];
