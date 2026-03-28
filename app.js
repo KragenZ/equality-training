@@ -339,8 +339,14 @@ function openEvent(key) {
           <select id="${c.id}" class="field-select" onchange="refreshEventLines()">${opts}</select>
         </div>`;
       } else if (c.type === 'textarea') {
+        const btn = c.id.includes('tourn') || c.id.includes('hg') || c.id.includes('glads') 
+          ? `<button class="btn-primary" onclick="loadRosterInto('${c.id}')" style="margin-top: 8px; padding: 4px 8px; font-size: 0.7rem; width: 100%;">📋 Load Roster</button>` 
+          : '';
         return `<div class="config-row" style="align-items: flex-start;">
-          <span class="config-label" style="margin-top: 8px;">${c.label}</span>
+          <div style="display:flex; flex-direction:column; width:120px;">
+            <span class="config-label" style="margin-top: 8px;">${c.label}</span>
+            ${btn}
+          </div>
           <textarea id="${c.id}" class="field-input field-textarea" placeholder="${c.placeholder||''}" oninput="refreshEventLines()" aria-label="${c.label}" style="width:100%; min-height: 80px;"></textarea>
         </div>`;
       } else if (c.type === 'custom') {
@@ -351,7 +357,7 @@ function openEvent(key) {
       } else {
         return `<div class="config-row">
           <span class="config-label">${c.label}</span>
-          <input type="text" id="${c.id}" class="field-input" placeholder="${c.placeholder||''}" oninput="refreshEventLines()" aria-label="${c.label}" style="width:200px"/>
+          <input type="text" id="${c.id}" class="field-input" placeholder="${c.placeholder||''}" oninput="refreshEventLines()" aria-label="${c.label}" list="roster-datalist" style="width:200px"/>
         </div>`;
       }
     }).join('');
@@ -755,7 +761,10 @@ function renderRoster() {
   if (_roster.length === 0) { empty.style.display = ''; return; }
   empty.style.display = 'none';
 
+  let datalistOptions = '';
+
   _roster.forEach((p, i) => {
+    if (p.status === 'active') datalistOptions += `<option value="${p.name}">`;
     const item = document.createElement('div');
     item.className = 'roster-item' + (p.strikes >= 2 ? ' at-risk' : '');
     item.innerHTML = `
@@ -773,6 +782,19 @@ function renderRoster() {
     `;
     list.appendChild(item);
   });
+
+  const dl = document.getElementById('roster-datalist');
+  if (dl) dl.innerHTML = datalistOptions;
+}
+
+function loadRosterInto(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const active = _roster.filter(p => p.status === 'active').map(p => p.name);
+  if (active.length === 0) { showToast('No active players in roster!'); return; }
+  el.value = active.join('\n');
+  refreshEventLines();
+  showToast(`Loaded ${active.length} players!`);
 }
 
 function addStrike(idx) {
