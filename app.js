@@ -748,7 +748,32 @@ function initRoster() {
   renderRoster();
   updateAnalytics();
   input.value = '';
-  showToast(`Imported ${raw.length} players!`);
+  showToast(`Overwrote and imported ${raw.length} players!`);
+}
+
+function appendToRoster() {
+  const input = document.getElementById('roster-input');
+  const raw = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  if (raw.length === 0) return;
+  
+  const existingNames = _roster.map(p => p.name.toLowerCase());
+  let added = 0;
+  raw.forEach(name => {
+    if (!existingNames.includes(name.toLowerCase())) {
+      _roster.push({ name, status: 'active', strikes: 0 });
+      added++;
+    }
+  });
+
+  saveRoster();
+  renderRoster();
+  updateAnalytics();
+  input.value = '';
+  if (added > 0) {
+    showToast(`Added ${added} new player(s)!`);
+  } else {
+    showToast(`No new players added (already on roster).`);
+  }
 }
 
 function saveRoster() { localStorage.setItem('roster_data', JSON.stringify(_roster)); }

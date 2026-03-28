@@ -341,7 +341,8 @@
           <textarea id="roster-input" class="field-input field-textarea" placeholder="Paste names (newline or comma separated)..." style="width:100%"></textarea>
         </div>
         <div style="display:flex;gap:12px;">
-          <button class="btn-primary" onclick="initRoster()" style="flex:1">📋 Update Roster</button>
+          <button class="btn-primary" onclick="appendToRoster()" style="flex:2;">➕ Add Player(s)</button>
+          <button class="btn-primary" onclick="initRoster()" style="flex:1; background: var(--bg-card); border: 1px solid var(--border-dim); color: var(--text-dim);" title="Wipe out everything and replace with new names">⚠️ Overwrite All</button>
           <button class="btn-primary" onclick="generateTrainingReport()" style="flex:1;background:var(--accent-t)">📊 Copy Summary Report</button>
         </div>
       </div>
