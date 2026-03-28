@@ -1234,21 +1234,20 @@ document.addEventListener('DOMContentLoaded', () => {
   initVoidCanvas();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
 
-  // OCR Paste Event Listener
-  const rosterInput = document.getElementById('roster-input');
-  if (rosterInput) {
-    rosterInput.addEventListener('paste', (e) => {
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-      for (let index in items) {
-        const item = items[index];
-        if (item.kind === 'file' && item.type.startsWith('image/')) {
-          e.preventDefault(); // Prevent default text dump
-          processRosterOCRFile(item.getAsFile());
-          return;
-        }
+  // Global OCR Paste Event Listener
+  document.addEventListener('paste', (e) => {
+    const items = (e.clipboardData || window.clipboardData)?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault(); 
+        switchTab('roster'); // Bring them to the Roster to see the scan 
+        processRosterOCRFile(item.getAsFile());
+        return;
       }
-    });
-  }
+    }
+  });
 });
 
 // ---- Elite Pro: Void Particles ----
