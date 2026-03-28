@@ -388,29 +388,30 @@ body {
 
 .tab-nav {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.03);
-  padding: 8px;
+  padding: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-dim);
   margin-bottom: 40px;
+  flex-wrap: wrap; /* Safety for very small windows */
 }
 
 .tab-btn {
-  flex: 1;
+  flex: 1 1 auto;
   background: transparent;
   border: none;
   color: var(--text-dim);
-  padding: 12px 20px;
+  padding: 8px 12px;
   border-radius: var(--radius);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tab-btn:hover {
