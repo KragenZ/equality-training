@@ -39,13 +39,8 @@
       </div>
       <div class="command-bar-container">
         <div class="command-bar" id="command-bar">
-          <button class="icon-btn" onclick="copyQuick(':m ')" title="Announcement">:m</button>
-          <button class="icon-btn" onclick="copyQuick(':kill ')" title="Kill">:kill</button>
-          <button class="icon-btn" onclick="copyQuick(':kick ')" title="Kick">:kick</button>
-          <button class="icon-btn" onclick="copyQuick(':tp ')" title="Teleport">:tp</button>
-          <button class="icon-btn" onclick="copyQuick(':slock')" title="Server Lock">:slock</button>
-          <button class="icon-btn" onclick="copyQuick(':unslock')" title="Unlock">:unslock</button>
-          <button class="icon-btn" onclick="copyQuick(':re ')" title="Refresh">:re</button>
+          <button class="btn-primary" onclick="copyQuick('!PSKICK ')" title="PS Kick" style="background:#ef4444;box-shadow:0 0 15px rgba(239,68,68,0.4)">⚡ !PSKICK</button>
+          <button class="btn-primary" onclick="copyQuick('!PSBAN ')" title="PS Ban" style="background:#000;border:1px solid #ef4444;box-shadow:0 0 15px rgba(239,68,68,0.2)">💀 !PSBAN</button>
         </div>
       </div>
     </div>
@@ -63,6 +58,9 @@
       </button>
       <button class="tab-btn" id="tab-roster" role="tab" aria-selected="false" onclick="switchTab('roster')">
         <span>📋</span> Roster
+      </button>
+      <button class="tab-btn" id="tab-templates" role="tab" aria-selected="false" onclick="switchTab('templates')">
+        <span>📜</span> Templates
       </button>
       <button class="tab-btn" id="tab-custom" role="tab" aria-selected="false" onclick="switchTab('custom')">
         <span>✏️</span> Custom
@@ -200,6 +198,41 @@
           <div>No players in roster. Import some above!</div>
         </div>
       </div>
+
+      <div class="history-section" id="history-section" style="margin-top:40px">
+        <div class="panel-header">
+           <h3 class="panel-subtitle">Training History</h3>
+           <p class="panel-desc">Previously finished sessions and winners.</p>
+        </div>
+        <div id="history-list" class="history-list">
+           <div class="empty-state">No past sessions found. Try finishing a training!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TEMPLATES ===== -->
+    <section class="panel" id="panel-templates">
+      <div class="panel-header">
+        <h2 class="panel-title">Script Template Editor</h2>
+        <p class="panel-desc">Edit the core training scripts. Changes take effect instantly for all events.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card full-width">
+          <div class="card-label">FFA Script Template</div>
+          <textarea id="tpl-ffa" class="field-input field-textarea" style="min-height:120px" oninput="saveTemplate('ffa')"></textarea>
+        </div>
+        <div class="card full-width">
+          <div class="card-label">Gladiators Script Template</div>
+          <textarea id="tpl-glads" class="field-input field-textarea" style="min-height:120px" oninput="saveTemplate('glads')"></textarea>
+        </div>
+        <div class="card full-width">
+          <div class="card-label">TDM Script Template</div>
+          <textarea id="tpl-tdm" class="field-input field-textarea" style="min-height:120px" oninput="saveTemplate('tdm')"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:20px; color:var(--text-muted); font-size:0.8rem">
+        💡 Note: Variables like <b>[Winner]</b> or <b>[Captain]</b> are automatically injected into these lines during the training.
+      </div>
     </section>
 
     <!-- ===== CUSTOM MESSAGES ===== -->
@@ -231,7 +264,7 @@
         <button class="theme-dot dot-red" onclick="setAccent('red')" title="Crimson Void"></button>
         <button class="theme-dot dot-gold" onclick="setAccent('gold')" title="Solar Gold"></button>
       </div>
-      <div class="footer-info">Equality Training — Press 1–4 to switch tabs</div>
+      <div class="footer-info">Equality Training — Press 1–5 to switch tabs</div>
     </div>
   </footer>
 

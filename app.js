@@ -10,6 +10,7 @@ function switchTab(name) {
   // When switching to events, always show selector
   if (name === 'events') closeEvent();
   if (name === 'roster') renderRoster();
+  if (name === 'templates') renderTemplates();
 }
 
 // ---- Toast ----
@@ -56,29 +57,22 @@ const EVENTS = {
     buildLines: () => {
       const r2 = document.getElementById('ffa-round')?.value === '2 Rounds';
       const w = document.getElementById('ffa-winner')?.value.trim() || '[Winner]';
-      const lines = [
-        { n:'1', text:'We will begin with FFA.', cls:'' },
-        { n:'2', text:'Please go down in the pit so we can begin the FFA.', cls:'' },
-        { n:'📜', text:'Rules: STS in the safezone upon death.', cls:'info-line' },
-        { n:'3', text:'3... 2... 1... GO!', cls:'' },
-      ];
+      const tpl = (getTemplate('ffa') || '').split('\n').filter(l => l.trim().length > 0);
+      
+      const lines = [];
+      // Use template for initial lines
+      tpl.forEach((line, i) => lines.push({ n: (i+1).toString(), text: line, cls: '' }));
+
       if (r2) {
-        lines.push({ n:'—', text:'── Round 1 End ──', cls:'divider' });
-        lines.push({ n:'4', text: winnerHTML(w) + ' stand beside me.', cls:'winner-line', winId:'ffa-w', suffix:' stand beside me.' });
-        lines.push({ n:'5', text:'Everyone else go down in the pit so we can continue the second FFA.', cls:'' });
-        lines.push({ n:'📜', text:'Rules: STS in the safezone upon death.', cls:'info-line' });
-        lines.push({ n:'6', text:'3... 2... 1... GO!', cls:'' });
-        lines.push({ n:'—', text:'── Round 2 End ──', cls:'divider' });
-        lines.push({ n:'7', text:'Stand beside me.', cls:'' });
-        lines.push({ n:'8', text:'That concludes our FFA session. Well done everyone!', cls:'' });
+        lines.push({ n:'—', text:'── Round 1 End (Custom) ──', cls:'divider' });
+        lines.push({ n:'W', text: winnerHTML(w) + ' stand beside me.', cls:'winner-line' });
       } else {
-        lines.push({ n:'—', text:'── FFA End ──', cls:'divider' });
-        lines.push({ n:'4', text: winnerHTML(w) + ' you are the winner! Stand beside me.', cls:'winner-line', winId:'ffa-w', suffix:' you are the winner! Stand beside me.' });
-        lines.push({ n:'5', text:'That concludes our FFA session. Well done everyone!', cls:'' });
+        lines.push({ n:'—', text:'── FFA End (Custom) ──', cls:'divider' });
+        lines.push({ n:'W', text: winnerHTML(w) + ' you are the winner!', cls:'winner-line' });
       }
       return lines;
     },
-    fullScript: () => `We will begin with FFA.\nPlease go down in the pit so we can begin the FFA.\nRules: STS in the safezone upon death.\n3... 2... 1... GO!`
+    fullScript: () => getTemplate('ffa')
   },
 
   glads: {
@@ -88,34 +82,21 @@ const EVENTS = {
       { id: 'glads-ft', label: 'Format', type: 'select', options: ['FT2','FT3'] },
       { id: 'glads-cap1', label: 'Captain 1', type: 'text', placeholder: 'e.g. PlayerA' },
       { id: 'glads-cap2', label: 'Captain 2', type: 'text', placeholder: 'e.g. PlayerB' },
-      { id: 'glads-order', label: 'Team Orders', type: 'textarea', placeholder: 'e.g. \nTeam 1: P1, P2, P3\nTeam 2: P4, P5, P6' },
-      { id: 'glads-winner', label: 'Winning Team', type: 'text', placeholder: 'e.g. Team PlayerA' },
+      { id: 'glads-order', label: 'Team Orders', type: 'textarea', placeholder: 'e.g. Team 1: P1, P2\nTeam 2: P3, P4' },
     ],
     buildLines: () => {
-      const ft   = document.getElementById('glads-ft')?.value || 'FT2';
-      const c1   = document.getElementById('glads-cap1')?.value.trim() || '[Captain 1]';
-      const c2   = document.getElementById('glads-cap2')?.value.trim() || '[Captain 2]';
-      const win  = document.getElementById('glads-winner')?.value.trim() || '[Winning Team]';
-      return [
-        { n:'1', text:'We will now be doing Gladiators.', cls:'' },
-        { n:'2', text:`The captains are: ${c1} and ${c2}.`, cls:'' },
-        { n:'3', text:`This will be a ${ft} Gladiators session.`, cls:'' },
-        { n:'4', text:`${c1}, you have the first pick. ${c2}, you will pick second.`, cls:'' },
-        { n:'5', text:'Once picks are done, please set your team order and DM it to me.', cls:'info-line' },
-        { n:'6', text:'Both captains, please announce your order to your team.', cls:'' },
-        { n:'7', text:'The first players from each team go down into the pit.', cls:'' },
-        { n:'📜', text:'Rules: Winner stays down and continues fighting. Loser is replaced by the next on their team. STS in safezone upon death.', cls:'info-line' },
-        { n:'8', text:'3... 2... 1... GO!', cls:'' },
-        { n:'—', text:'── Ongoing: Replace players as they fall ──', cls:'divider' },
-        { n:'9', text: winnerHTML(win) + ` wins the Gladiators! Congratulations!`, cls:'winner-line' },
-      ];
-    },
-    fullScript: () => {
       const ft  = document.getElementById('glads-ft')?.value || 'FT2';
       const c1  = document.getElementById('glads-cap1')?.value.trim() || '[Captain 1]';
       const c2  = document.getElementById('glads-cap2')?.value.trim() || '[Captain 2]';
-      return `We will now be doing Gladiators.\nThe captains are: ${c1} and ${c2}.\nThis will be a ${ft} Gladiators session.\n${c1}, you have the first pick. ${c2}, you will pick second.\nOnce picks are done, please set your team order and DM it to me.\nBoth captains, please announce your order to your team.\nThe first players from each team go down into the pit.\nRules: Winner stays down and continues fighting. Loser is replaced by the next on their team. STS in safezone upon death.\n3... 2... 1... GO!`;
-    }
+      const tpl = (getTemplate('glads') || '')
+        .replace(/\[Captain 1\]/g, c1).replace(/\[Captain 2\]/g, c2).replace(/\[Format\]/g, ft)
+        .split('\n').filter(l => l.trim().length > 0);
+      
+      const lines = [];
+      tpl.forEach((line, i) => lines.push({ n: (i+1).toString(), text: line, cls: '' }));
+      return lines;
+    },
+    fullScript: () => getTemplate('glads')
   },
 
   tdm: {
@@ -151,33 +132,20 @@ const EVENTS = {
       const c2  = document.getElementById('tdm-cap2')?.value.trim() || '[Captain 2]';
       const s1  = document.getElementById('score-1')?.textContent || '0';
       const s2  = document.getElementById('score-2')?.textContent || '0';
+      const tpl = (getTemplate('tdm') || '')
+        .replace(/\[Captain 1\]/g, c1).replace(/\[Captain 2\]/g, c2).replace(/\[Format\]/g, ft)
+        .split('\n').filter(l => l.trim().length > 0);
       
-      const lines = [
-        { n:'1', text:'We will now be doing TDM.', cls:'' },
-        { n:'2', text:'Everyone STS 1 tile in front of me.', cls:'' },
-        { n:'3', text:`This will be a ${ft} TDM ONLY.`, cls:'' },
-        { n:'4', text:`The captains are: ${c1} and ${c2}.`, cls:'' },
-        { n:'5', text:'Since we will be doing TDM make sure to ally your team and stand behind your captain once chosen.', cls:'' },
-        { n:'6', text:'Say "Y" if you understood what I just said.', cls:'' },
-        { n:'7', text:'PTS is OFF for Captains ONLY.', cls:'' },
-        { n:'8', text:`${c1}, you may have the first pick.`, cls:'' },
-        { n:'9', text:'(All picks done) I hope you have all allied your respective teams.', cls:'info-line' },
-        { n:'10', text:'Both teams go to your respective sides.', cls:'' },
-        { n:'📜', text:'Rules: STS in safezone upon death.', cls:'info-line' },
-        { n:'11', text:'3... 2... 1... GO!', cls:'' },
-      ];
+      const lines = [];
+      tpl.forEach((line, i) => lines.push({ n: (i+1).toString(), text: line, cls: '' }));
 
       if (s1 !== '0' || s2 !== '0') {
-        lines.push({ n:'—', text:'── Live Score Evolution ──', cls:'divider' });
+        lines.push({ n:'—', text:'── Live Score Update ──', cls:'divider' });
         lines.push({ n:'📈', text: `The current score is ${s1} - ${s2}.`, cls:'info-line' });
-        if (parseInt(s1) >= 2 || parseInt(s2) >= 2) {
-          const winTeam = parseInt(s1) > parseInt(s2) ? c1 : c2;
-          lines.push({ n:'🏆', text: `That concludes the TDM session. Team ${winTeam} is the Victor!`, cls:'winner-line' });
-        }
       }
       return lines;
     },
-    fullScript: () => `We will now be doing TDM.\nEveryone STS 1 tile in front of me.\nThis will be a ${ft} TDM ONLY.\nThe captains are: ${c1} and ${c2}.\nSince we will be doing TDM make sure to ally your team and stand behind your captain once chosen.\nSay "Y" if you understood what I just said.\nPTS is OFF for Captains ONLY.\nRules: STS in safezone upon death.\n3... 2... 1... GO!`
+    fullScript: () => getTemplate('tdm')
   },
 
   tournament: {
@@ -624,7 +592,8 @@ document.addEventListener('keydown', e => {
   if (e.key === '1') switchTab('abbr');
   else if (e.key === '2') switchTab('events');
   else if (e.key === '3') switchTab('roster');
-  else if (e.key === '4') switchTab('custom');
+  else if (e.key === '4') switchTab('templates');
+  else if (e.key === '5') switchTab('custom');
   else if (e.key === 'Escape' && _currentEvent) closeEvent();
 });
 
@@ -745,19 +714,79 @@ function generateTrainingReport() {
   ].join('\n');
   
   copyText(report);
-}
-
-// ---- Elite Pro: Themes ----
-function setAccent(color) {
-  document.body.setAttribute('data-theme', color);
-  localStorage.setItem('void_theme', color);
-  document.querySelectorAll('.theme-dot').forEach(d => {
-    d.classList.remove('active');
-    if (d.classList.contains('dot-' + color)) d.classList.add('active');
+  
+  // Log to history
+  logSessionSnapshot({
+    date: new Date().toLocaleString(),
+    duration: `${h}h ${m}m`,
+    survivors: active.length,
+    failed: failed.length,
+    names: active.join(', ')
   });
 }
 
-function loadTheme() {
-  const t = localStorage.getItem('void_theme') || 'purple';
-  setAccent(t);
+// ---- Elite Pro: History ----
+let _history = JSON.parse(localStorage.getItem('training_history')) || [];
+
+function logSessionSnapshot(data) {
+  _history.unshift(data);
+  if (_history.length > 10) _history.pop(); // Keep last 10
+  localStorage.setItem('training_history', JSON.stringify(_history));
+  renderHistory();
 }
+
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if (!container) return;
+  
+  if (_history.length === 0) {
+    container.innerHTML = `<div class="empty-state">No past sessions found. Try finishing a training!</div>`;
+    return;
+  }
+
+  container.innerHTML = _history.map(h => `
+    <div class="history-card">
+      <div class="history-header">
+        <span class="history-title">Training Session</span>
+        <span class="history-date">${h.date}</span>
+      </div>
+      <div class="history-body">
+        ⏱ Duration: ${h.duration}
+        ✅ Survivors: ${h.survivors} (${h.names || 'N/A'})
+        ❌ Failed: ${h.failed}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- Elite Pro: Templates ----
+const DEFAULT_TEMPLATES = {
+  ffa: "We will begin with FFA.\nPlease go down in the pit so we can begin the FFA.\nRules: STS in the safezone upon death.\n3... 2... 1... GO!",
+  glads: "We will now be doing Gladiators.\nThe captains are: [Captain 1] and [Captain 2].\nThis will be a [Format] Gladiators session.\n[Captain 1], you move first. [Captain 2], you move second.\nBoth captains, announce your order.\nThe first players from each team go down.\nRules: Winner stays down. Loser is replaced. STS in safezone.\n3... 2... 1... GO!",
+  tdm: "We will now be doing TDM.\nEveryone STS 1 tile in front of me.\nThis will be a [Format] TDM ONLY.\nThe captains are: [Captain 1] and [Captain 2].\nAlly your team and stand behind your captain.\nBoth teams go to your respective sides.\nRules: STS in safezone upon death.\n3... 2... 1... GO!"
+};
+
+let _templates = JSON.parse(localStorage.getItem('script_templates')) || DEFAULT_TEMPLATES;
+
+function getTemplate(key) { return _templates[key] || DEFAULT_TEMPLATES[key]; }
+
+function saveTemplate(key) {
+  const val = document.getElementById('tpl-' + key).value;
+  _templates[key] = val;
+  localStorage.setItem('script_templates', JSON.stringify(_templates));
+}
+
+function renderTemplates() {
+  Object.keys(_templates).forEach(k => {
+    const el = document.getElementById('tpl-' + k);
+    if (el) el.value = _templates[k];
+  });
+}
+
+// Edit switchTab or init to call renderHistory
+document.addEventListener('DOMContentLoaded', () => {
+  renderCustom();
+  loadTheme();
+  renderHistory();
+  if (localStorage.getItem('timer_running') === 'true') toggleTimer();
+});

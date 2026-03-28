@@ -437,6 +437,10 @@ body {
   overflow: hidden;
 }
 
+.card.full-width {
+  grid-column: 1 / -1;
+}
+
 .card::before {
   content: '';
   position: absolute;
@@ -882,6 +886,32 @@ body {
 .dot-blue { background: #06b6d4; }
 .dot-red { background: #ef4444; }
 .dot-gold { background: #f59e0b; }
+
+/* ---- History Styles ---- */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.history-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: var(--transition);
+}
+.history-card:hover { border-color: var(--accent-p); background: rgba(255,255,255,0.04); }
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.history-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+.history-title { font-size: 0.95rem; font-weight: 800; color: var(--accent-p); }
+.history-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; white-space: pre-line; }
 
 /* ---- Toast ---- */
 .toast {
