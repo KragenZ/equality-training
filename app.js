@@ -11,6 +11,7 @@ function switchTab(name) {
   if (name === 'events') closeEvent();
   if (name === 'roster') renderRoster();
   if (name === 'templates') renderTemplates();
+  if (name === 'routine') renderRoutine();
 }
 
 // ---- Toast ----
@@ -591,9 +592,10 @@ document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea,select')) return;
   if (e.key === '1') switchTab('abbr');
   else if (e.key === '2') switchTab('events');
-  else if (e.key === '3') switchTab('roster');
-  else if (e.key === '4') switchTab('templates');
-  else if (e.key === '5') switchTab('custom');
+  else if (e.key === '3') switchTab('routine');
+  else if (e.key === '4') switchTab('roster');
+  else if (e.key === '5') switchTab('templates');
+  else if (e.key === '6') switchTab('custom');
   else if (e.key === 'Escape' && _currentEvent) closeEvent();
 });
 
@@ -783,10 +785,130 @@ function renderTemplates() {
   });
 }
 
-// Edit switchTab or init to call renderHistory
 document.addEventListener('DOMContentLoaded', () => {
   renderCustom();
   loadTheme();
   renderHistory();
+  loadRoutine();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
 });
+
+// ---- Elite Pro: Tactical Routine ----
+let _routine = JSON.parse(localStorage.getItem('training_routine')) || [];
+let _activeIndex = -1; // -1 means no active routine
+
+function addToRoutine() {
+  const sel = document.getElementById('routine-add-select');
+  const eventId = sel.value;
+  const eventName = sel.options[sel.selectedIndex].text;
+  _routine.push({ id: eventId, name: eventName });
+  saveRoutine();
+  renderRoutine();
+  showToast(`Added ${eventName} to routine!`);
+}
+
+function removeFromRoutine(idx) {
+  _routine.splice(idx, 1);
+  saveRoutine();
+  renderRoutine();
+}
+
+function clearRoutine() {
+  _routine = [];
+  _activeIndex = -1;
+  saveRoutine();
+  renderRoutine();
+  updatePhaseUI();
+}
+
+function saveRoutine() {
+  localStorage.setItem('training_routine', JSON.stringify(_routine));
+}
+
+function loadRoutine() {
+  _activeIndex = parseInt(localStorage.getItem('routine_active_idx')) || -1;
+  renderRoutine();
+  updatePhaseUI();
+}
+
+function renderRoutine() {
+  const list = document.getElementById('routine-list');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  if (_routine.length === 0) {
+    list.innerHTML = '<div class="empty-state">No events in your routine yet. Add some above!</div>';
+    return;
+  }
+
+  _routine.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'routine-item';
+    if (i === _activeIndex) div.style.borderColor = 'var(--accent-p)';
+    div.innerHTML = `
+      <div class="routine-idx">${i + 1}</div>
+      <div class="routine-name">${item.name}</div>
+      <button class="routine-remove" onclick="removeFromRoutine(${i})">✖</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function startRoutine() {
+  if (_routine.length === 0) { showToast('Routine is empty!'); return; }
+  _activeIndex = 0;
+  localStorage.setItem('routine_active_idx', _activeIndex);
+  updatePhaseUI();
+  executePhase();
+}
+
+function stopRoutine() {
+  _activeIndex = -1;
+  localStorage.setItem('routine_active_idx', _activeIndex);
+  updatePhaseUI();
+}
+
+function nextPhase() {
+  if (_activeIndex < _routine.length - 1) {
+    _activeIndex++;
+    localStorage.setItem('routine_active_idx', _activeIndex);
+    updatePhaseUI();
+    executePhase();
+  } else {
+    showToast('Routine complete!');
+    stopRoutine();
+  }
+}
+
+function prevPhase() {
+  if (_activeIndex > 0) {
+    _activeIndex--;
+    localStorage.setItem('routine_active_idx', _activeIndex);
+    updatePhaseUI();
+    executePhase();
+  }
+}
+
+function updatePhaseUI() {
+  const nav = document.getElementById('phase-nav');
+  if (_activeIndex === -1) {
+    nav.classList.add('hidden');
+  } else {
+    nav.classList.remove('hidden');
+    const item = _routine[_activeIndex];
+    document.getElementById('phase-current-name').textContent = item.name;
+    document.getElementById('phase-step').textContent = `${_activeIndex + 1}/${_routine.length}`;
+  }
+  renderRoutine();
+}
+
+function executePhase() {
+  const item = _routine[_activeIndex];
+  if (['abbr', 'custom', 'roster', 'templates'].includes(item.id)) {
+    switchTab(item.id);
+  } else {
+    switchTab('events');
+    openEvent(item.id);
+  }
+  showToast(`Current Phase: ${item.name}`);
+}

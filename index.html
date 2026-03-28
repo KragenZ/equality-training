@@ -44,6 +44,20 @@
         </div>
       </div>
     </div>
+    
+    <!-- Phase Navigator (Active Routine) -->
+    <div id="phase-nav" class="phase-nav hidden">
+      <div class="phase-info">
+        <span class="phase-label">CURRENT PHASE:</span>
+        <span id="phase-current-name" class="phase-name">None</span>
+        <span id="phase-step" class="phase-step">1/1</span>
+      </div>
+      <div class="phase-btns">
+        <button class="phase-btn" onclick="prevPhase()">← Prev</button>
+        <button class="phase-btn btn-next" onclick="nextPhase()">Next Phase →</button>
+        <button class="phase-btn btn-close" onclick="stopRoutine()">✖</button>
+      </div>
+    </div>
     </div>
   </header>
 
@@ -55,6 +69,9 @@
       </button>
       <button class="tab-btn" id="tab-events" role="tab" aria-selected="false" onclick="switchTab('events')">
         <span>🎮</span> Events
+      </button>
+      <button class="tab-btn" id="tab-routine" role="tab" aria-selected="false" onclick="switchTab('routine')">
+        <span>📅</span> Routine
       </button>
       <button class="tab-btn" id="tab-roster" role="tab" aria-selected="false" onclick="switchTab('roster')">
         <span>📋</span> Roster
@@ -176,6 +193,51 @@
       </div>
     </section>
 
+    <!-- ===== ROUTINE ===== -->
+    <section class="panel" id="panel-routine">
+      <div class="panel-header">
+        <h2 class="panel-title">Tactical Training Routine</h2>
+        <p class="panel-desc">Plan your sequence of events. The app will guide you through each one.</p>
+      </div>
+      
+      <div class="routine-builder">
+        <div class="routine-config">
+          <div class="config-row">
+            <span class="config-label">Add Event</span>
+            <select id="routine-add-select" class="field-input">
+              <optgroup label="Core Events">
+                <option value="ffa">FFA (Free For All)</option>
+                <option value="glads">Gladiators</option>
+                <option value="tdm">TDM (Team Deathmatch)</option>
+                <option value="tournament">Tournament (1v1/2v2)</option>
+                <option value="koth">KOTH (King Of The Hill)</option>
+                <option value="jugg">Juggernaut</option>
+                <option value="hg">Hunger Games</option>
+              </optgroup>
+              <optgroup label="Extras">
+                <option value="abbr">Perms/Abbreviations</option>
+                <option value="custom">Custom Messages</option>
+              </optgroup>
+            </select>
+            <button class="btn-primary" onclick="addToRoutine()" style="white-space:nowrap">➕ Add</button>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:20px;">
+            <button class="btn-primary" onclick="startRoutine()" style="flex:1;background:var(--accent-p);box-shadow:var(--shadow-glow)">🚀 Start Routine</button>
+            <button class="btn-primary" onclick="clearRoutine()" style="flex:1;background:var(--bg-card);border:1px solid var(--border-dim)">🗑️ Clear All</button>
+          </div>
+        </div>
+
+        <div class="routine-list-container">
+          <div class="panel-header" style="margin-top:30px">
+            <h3 class="panel-subtitle">Event Sequence</h3>
+          </div>
+          <div id="routine-list" class="routine-list">
+            <div class="empty-state">No events in your routine yet. Add some above!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== ROSTER ===== -->
     <section class="panel" id="panel-roster">
       <div class="panel-header">
@@ -264,7 +326,7 @@
         <button class="theme-dot dot-red" onclick="setAccent('red')" title="Crimson Void"></button>
         <button class="theme-dot dot-gold" onclick="setAccent('gold')" title="Solar Gold"></button>
       </div>
-      <div class="footer-info">Equality Training — Press 1–5 to switch tabs</div>
+      <div class="footer-info">Equality Training — Press 1–6 to switch tabs</div>
     </div>
   </footer>
 
