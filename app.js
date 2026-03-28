@@ -209,37 +209,36 @@ const EVENTS = {
         } else {
           lines.push({ n:'—', text:'── ACTIVE MATCHES ──', cls:'divider' });
           
-          // Find the "current" active matches:
-          // We show matches in the earliest round that are NOT full (no winner) or have both slots filled.
           let foundActive = false;
-          rounds.forEach((r, rIdx) => {
-            if (foundActive) return;
-            const playableMatches = [];
-            r.forEach((m, mIdx) => {
-              // A match is "Playable" if both slots are filled and it hasn't advanced to next round yet
-              // Actually, simplified: Show the first round that has TBD matches.
+          // Loop through rounds to find the first round that has "playable" matches
+          for (let rIdx = 0; rIdx < rounds.length; rIdx++) {
+            const matches = rounds[rIdx];
+            const playableInRound = [];
+            
+            for (let mIdx = 0; mIdx < matches.length; mIdx++) {
+              const m = matches[mIdx];
+              // Playable if both slots are filled and no winner is in the next round yet
               if (m[0] && m[1] && m[0] !== 'BYE' && m[1] !== 'BYE') {
-                 // Check if winner is already in next round
-                 const nextRound = rounds[rIdx + 1];
-                 if (nextRound) {
-                   const nextMIdx = Math.floor(mIdx / 2);
-                   const nextSIdx = mIdx % 2;
-                   if (nextRound[nextMIdx][nextSIdx] === m[0] || nextRound[nextMIdx][nextSIdx] === m[1]) {
-                     return; // Already solved
-                   }
-                 }
-                 playableMatches.push(m);
+                let alreadyAdvanced = false;
+                if (rIdx + 1 < rounds.length) {
+                  const nextMIdx = Math.floor(mIdx / 2);
+                  const nextSIdx = mIdx % 2;
+                  const nextVal = rounds[rIdx + 1][nextMIdx][nextSIdx];
+                  if (nextVal === m[0] || nextVal === m[1]) alreadyAdvanced = true;
+                }
+                if (!alreadyAdvanced) playableInRound.push(m);
               }
-            });
+            }
 
-            if (playableMatches.length > 0) {
-              playableMatches.forEach((m, i) => {
+            if (playableInRound.length > 0) {
+              playableInRound.forEach((m, i) => {
                 lines.push({ n: (i+1).toString(), text: `${m[0]} VS ${m[1]}`, cls: 'match-line' });
                 lines.push({ n: '⚡', text: '3... 2... 1... GO!', cls: 'small-line' });
               });
               foundActive = true;
+              break; // Only show one round's matches at a time
             }
-          });
+          }
 
           if (!foundActive) {
             lines.push({ n:'💡', text: 'Click on winners in the bracket above to advance!', cls:'info-line' });
