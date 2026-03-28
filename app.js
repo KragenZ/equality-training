@@ -13,6 +13,7 @@ function switchTab(name) {
   if (name === 'templates') renderTemplates();
   if (name === 'routine') renderRoutine();
   if (name === 'announce') generateAnnouncePreview();
+  if (name === 'report') renderReportPanel();
 }
 
 // ---- Toast ----
@@ -841,6 +842,112 @@ function setRosterStatus(idx, status) {
   saveRoster();
   renderRoster();
   updateAnalytics(); 
+}
+
+// ---- Elite Pro: Points & Final Report ----
+let _playerPoints = JSON.parse(localStorage.getItem('points_data')) || {};
+
+function renderReportPanel() {
+  const editor = document.getElementById('report-point-editor');
+  if (!editor) return;
+  
+  const activePlayers = _roster.filter(p => p.status === 'active').map(p => p.name);
+  if (activePlayers.length === 0) {
+    editor.innerHTML = '<div class="empty-state">No active players to grade. Import the roster first!</div>';
+  } else {
+    // Render toggles
+    let html = '';
+    activePlayers.forEach(name => {
+      const pts = _playerPoints[name] || 100; // default 100
+      html += `
+        <div class="line-item" style="padding: 10px 16px; margin-bottom: 4px;">
+          <div class="line-content" style="font-weight: 700;">${escHTML(name)}</div>
+          <div style="display:flex; gap: 4px;">
+            <button class="btn-status ${pts === 90 ? 'active-status' : ''}" onclick="setPlayerPoints('${escHTML(name)}', 90)" style="width: 50px;">90</button>
+            <button class="btn-status ${pts === 100 ? 'active-status' : ''}" onclick="setPlayerPoints('${escHTML(name)}', 100)" style="width: 50px;">100</button>
+          </div>
+        </div>
+      `;
+    });
+    editor.innerHTML = html;
+  }
+  
+  buildFinalReportText();
+}
+
+function setPlayerPoints(name, val) {
+  _playerPoints[name] = val;
+  localStorage.setItem('points_data', JSON.stringify(_playerPoints));
+  renderReportPanel();
+}
+
+function setAllPoints(val) {
+  _roster.filter(p => p.status === 'active').forEach(p => {
+    _playerPoints[p.name] = val;
+  });
+  localStorage.setItem('points_data', JSON.stringify(_playerPoints));
+  renderReportPanel();
+}
+
+function buildFinalReportText() {
+  const out = document.getElementById('report-output-text');
+  if (!out) return;
+  
+  const host = document.getElementById('ann-host')?.value || '[HostName]';
+  const activePlayers = _roster.filter(p => p.status === 'active').map(p => p.name);
+  const excused = _roster.filter(p => p.status === 'excused').map(p => p.name);
+  const failed = _roster.filter(p => p.status === 'failed').map(p => p.name);
+  
+  let lines = [];
+  lines.push(`Host: (${host})`);
+  lines.push('');
+  
+  lines.push('Attendees:');
+  
+  let everyoneGot100 = true;
+  let everyoneGot90 = true;
+  if (activePlayers.length === 0) {
+    everyoneGot100 = false;
+    everyoneGot90 = false;
+  }
+  
+  activePlayers.forEach(name => {
+    const pts = _playerPoints[name] || 100;
+    if (pts !== 100) everyoneGot100 = false;
+    if (pts !== 90) everyoneGot90 = false;
+  });
+
+  if (activePlayers.length === 0) {
+    lines.push('None');
+  } else if (everyoneGot100) {
+    activePlayers.forEach(name => lines.push(name));
+    lines.push('');
+    lines.push('100 @Points');
+  } else if (everyoneGot90) {
+    activePlayers.forEach(name => lines.push(name));
+    lines.push('');
+    lines.push('90 @Points');
+  } else {
+    // Mixed points
+    activePlayers.forEach(name => {
+      const pts = _playerPoints[name] || 100;
+      lines.push(`${name} ${pts}`);
+    });
+    lines.push('');
+    lines.push('@Points');
+  }
+  
+  lines.push('');
+  lines.push('Left:');
+  if (excused.length === 0) lines.push('None');
+  else excused.forEach(name => lines.push(name));
+  
+  lines.push('');
+  lines.push('Kicked:');
+  if (failed.length === 0) lines.push('None');
+  else failed.forEach(name => lines.push(name));
+  
+  out.textContent = lines.join('\n');
 }
 
 function generateTrainingReport() {

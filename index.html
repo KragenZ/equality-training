@@ -110,6 +110,9 @@
       <button class="tab-btn" id="tab-templates" role="tab" aria-selected="false" onclick="switchTab('templates')">
         <span>📜</span> Templates
       </button>
+      <button class="tab-btn" id="tab-report" role="tab" aria-selected="false" onclick="switchTab('report')">
+        <span>📊</span> Report
+      </button>
       <button class="tab-btn" id="tab-custom" role="tab" aria-selected="false" onclick="switchTab('custom')">
         <span>✏️</span> Custom
       </button>
@@ -383,6 +386,43 @@
         </div>
         <div class="event-bars" id="event-bars-list">
            <!-- Dynamic Bars Here -->
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- ===== REPORT ===== -->
+    <section class="panel" id="panel-report">
+      <div class="panel-header">
+        <h2 class="panel-title">Final Training Report</h2>
+        <p class="panel-desc">Quickly distribute points and get your final Host Report ping exactly formatted for Discord.</p>
+      </div>
+      
+      <div class="cards-grid" style="grid-template-columns: 1fr 1fr; align-items: start;">
+        <!-- Left: Point Editor -->
+        <div class="config-section" style="margin: 0; padding: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+             <h3 class="panel-subtitle" style="margin:0;">Distribute Points</h3>
+             <div style="display:flex; gap:8px;">
+               <button class="btn-primary" onclick="setAllPoints(90)" style="padding: 4px 8px; font-size: 0.7rem; background: var(--bg-card); border: 1px solid var(--border-dim); color: var(--text-dim);">Set All 90</button>
+               <button class="btn-primary" onclick="setAllPoints(100)" style="padding: 4px 8px; font-size: 0.7rem; background: var(--bg-card); border: 1px solid var(--border-dim); color: var(--text-dim);">Set All 100</button>
+             </div>
+          </div>
+          <div id="report-point-editor" style="display:flex; flex-direction:column; gap:8px; max-height: 400px; overflow-y:auto; padding-right:10px;">
+             <!-- Point toggles injected here -->
+             <div class="empty-state">No active players to grade.</div>
+          </div>
+        </div>
+
+        <!-- Right: Discord Output -->
+        <div class="card" style="padding: 0; background: rgba(0,0,0,0.5); border: 1px solid var(--border-bright);">
+          <div style="padding: 15px 20px; border-bottom: 1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center;">
+            <h3 class="panel-subtitle" style="margin:0; font-size:1rem;">Discord Report</h3>
+            <button class="copy-btn" onclick="copyText(document.getElementById('report-output-text').textContent, this)" style="padding: 6px 12px; font-size: 0.75rem;">📋 Copy</button>
+          </div>
+          <div id="report-output-text" style="padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-primary); white-space: pre-wrap; user-select: text;">
+             <!-- Final text injected here -->
+          </div>
         </div>
       </div>
     </section>
