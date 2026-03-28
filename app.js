@@ -750,6 +750,47 @@ function copyQuick(cmd) {
 // ---- Elite Pro: Roster ----
 let _roster = JSON.parse(localStorage.getItem('roster_data')) || [];
 
+async function processRosterOCR(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const btn = document.getElementById('btn-ocr');
+  const ogText = btn.innerHTML;
+  btn.innerHTML = '⏳ Scanning Image...';
+  btn.disabled = true;
+
+  try {
+    const worker = await Tesseract.createWorker('eng');
+    const ret = await worker.recognize(file);
+    await worker.terminate();
+
+    const lines = ret.data.text.split('\n');
+    let names = [];
+    lines.forEach(l => {
+      let clean = l.replace(/^[0-9:\.]+$/, '').replace(/[\[\]\(\)\{\}|\\\/\@><]/g, '').trim();
+      let chunks = clean.split(/\s+/);
+      chunks.forEach(c => {
+        // Exclude UI garbage words and isolated digits
+        if (c.length > 2 && !c.toLowerCase().includes('roblox') && !c.toLowerCase().includes('chat') && !c.toLowerCase().includes('menu') && isNaN(c)) {
+          names.push(c);
+        }
+      });
+    });
+
+    const ta = document.getElementById('roster-input');
+    // Remove duplicates to be clean
+    const unique = [...new Set(names)];
+    ta.value += (ta.value ? '\n' : '') + unique.join('\n');
+    showToast(`Extracted ${unique.length} potential names!`);
+  } catch (err) {
+    showToast('OCR Error. Try a clearer image!');
+    console.error('OCR Error:', err);
+  } finally {
+    btn.innerHTML = ogText;
+    btn.disabled = false;
+    e.target.value = '';
+  }
+}
+
 function initRoster() {
   const input = document.getElementById('roster-input');
   const raw = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
@@ -1124,16 +1165,29 @@ function renderEventBars() {
   }).join('');
 }
 
-// Modify openEvent and closeEvent to hook into timers
+// Modify openEvent and closeEvent to hook into timers and dynamic atmospheres
 const originalOpenEvent = openEvent;
 openEvent = (id) => {
   startEventTimer(id);
+  
+  const combatTheme = ['ffa', 'glads', 'tdm', 'jugg', 'hg'];
+  const competeTheme = ['tournament', 'koth'];
+  
+  if (combatTheme.includes(id)) {
+    document.body.setAttribute('data-event-theme', 'combat');
+  } else if (competeTheme.includes(id)) {
+    document.body.setAttribute('data-event-theme', 'compete');
+  } else {
+    document.body.removeAttribute('data-event-theme');
+  }
+  
   originalOpenEvent(id);
 };
 
 const originalCloseEvent = closeEvent;
 closeEvent = () => {
   stopEventTimer();
+  document.body.removeAttribute('data-event-theme');
   originalCloseEvent();
 };
 
@@ -1196,14 +1250,23 @@ class Particle {
     this.opacity = Math.random() * 0.5 + 0.1;
   }
   update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
+    let speedMult = 1;
+    const evTheme = document.body.getAttribute('data-event-theme');
+    if (evTheme === 'combat') speedMult = 5.0; // Fast Red phase
+    else if (evTheme === 'compete') speedMult = 2.5; // Med Gold phase
+
+    this.x += this.speedX * speedMult;
+    this.y += this.speedY * speedMult;
     if (this.x < 0 || this.x > _canvas.width || this.y < 0 || this.y > _canvas.height) {
       this.reset();
     }
   }
   draw() {
-    const accent = getComputedStyle(document.body).getPropertyValue('--accent-p').trim();
+    let accent = getComputedStyle(document.body).getPropertyValue('--accent-p').trim();
+    const evTheme = document.body.getAttribute('data-event-theme');
+    if (evTheme === 'combat') accent = '#ef4444'; // Blood Red
+    else if (evTheme === 'compete') accent = '#f59e0b'; // Gold
+
     _ctx.fillStyle = accent;
     _ctx.globalAlpha = this.opacity;
     _ctx.beginPath();
