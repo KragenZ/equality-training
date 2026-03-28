@@ -153,8 +153,9 @@ const EVENTS = {
 
   tournament: {
     icon: '🏆', name: 'Tournament', full: 'Tournament (Bracket Mode)',
-    desc: 'Generate a professional 1v1 bracket (4, 8, or 16 players). Click on a player\'s name in the visualizer to advance them to the next round!',
+    desc: 'Generate a professional 1v1 or 2v2 bracket. Click on a player or team in the visualizer to advance them to the next round!',
     config: [
+      { id: 'tourn-format', label: 'Format', type: 'select', options: ['1v1', '2v2'] },
       { id: 'tourn-players', label: 'Participants', type: 'textarea', placeholder: 'Paste player names here (one per line)...' },
       { id: 'tourn-gen', label: 'Actions', type: 'custom', render: () => `
         <div style="display:flex; gap:10px;">
@@ -433,11 +434,21 @@ function updateScore(team, delta) {
 
 function initTournament() {
   const input = document.getElementById('tourn-players');
+  const fmt = document.getElementById('tourn-format')?.value || '1v1';
   if (!input) return;
-  const names = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  let names = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
   if (names.length < 2) { showToast('Need at least 2 players!'); return; }
 
   shuffleArray(names);
+  
+  if (fmt === '2v2') {
+    const pairs = [];
+    for (let i = 0; i < names.length; i += 2) {
+      if (i + 1 < names.length) pairs.push(`${names[i]} & ${names[i+1]}`);
+      else pairs.push(names[i]);
+    }
+    names = pairs;
+  }
   
   // Calculate power of 2 bracket size
   const size = Math.pow(2, Math.ceil(Math.log2(names.length)));
