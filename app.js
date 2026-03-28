@@ -180,36 +180,73 @@ const EVENTS = {
   },
 
   tournament: {
-    icon: '🏆', name: 'Tournament', full: 'Tournament (IQ Mode)',
-    desc: 'Input participants and generate random 1v1 or 2v2 brackets automatically.',
+    icon: '🏆', name: 'Tournament', full: 'Tournament (Bracket Mode)',
+    desc: 'Generate a professional 1v1 bracket (4, 8, or 16 players). Click on a player\'s name in the visualizer to advance them to the next round!',
     config: [
-      { id: 'tourn-mode', label: 'Mode', type: 'select', options: ['1v1','2v2'] },
       { id: 'tourn-players', label: 'Participants', type: 'textarea', placeholder: 'Paste player names here (one per line)...' },
-      { id: 'tourn-gen', label: 'Actions', type: 'custom', render: () => `<button class="btn-primary" onclick="generateBrackets()" style="width:100%">🎲 Generate Random Matchups</button>` }
+      { id: 'tourn-gen', label: 'Actions', type: 'custom', render: () => `
+        <div style="display:flex; gap:10px;">
+          <button class="btn-primary" onclick="initTournament()" style="flex:2">🎲 Generate Visual Bracket</button>
+          <button class="btn-reset" onclick="resetTournament()" title="Clear Bracket">↺</button>
+        </div>` },
+      { id: 'tourn-visual', label: 'Bracket View', type: 'custom', render: () => `<div id="bracket-view" class="bracket-view"></div>` }
     ],
-    state: { matchups: [] },
+    state: { rounds: [], currentMatch: { r:0, m:0 } },
     buildLines: () => {
-      const mode = document.getElementById('tourn-mode')?.value || '1v1';
-      const matches = EVENTS.tournament.state.matchups || [];
-      
+      const rounds = EVENTS.tournament.state.rounds || [];
       const lines = [
-        { n:'1', text:`We will now be doing a ${mode} Tournament.`, cls:'' },
-        { n:'2', text:'Winner stands on the right side. Loser stands on the left side.', cls:'' },
-        { n:'3', text:'Wait for me to call the matches.', cls:'' },
+        { n:'1', text:'We will now be doing a Tournament.', cls:'' },
         { n:'📜', text:'Rules: STS in safezone upon death. No attacking in safezone.', cls:'info-line' },
       ];
 
-      if (matches.length > 0) {
-        lines.push({ n:'—', text:'── Generated Matchups ──', cls:'divider' });
-        matches.forEach((m, i) => {
-          const vs = mode === '1v1' ? `${m[0]} VS ${m[1]}` : `(${m[0]}, ${m[1]}) VS (${m[2]}, ${m[3]})`;
-          lines.push({ n: (i+1).toString(), text: vs, cls: 'match-line' });
-          lines.push({ n: '⚡', text: '3... 2... 1... GO!', cls: 'small-line' });
-        });
-        lines.push({ n:'—', text:'── Finals ──', cls:'divider' });
-        lines.push({ n:'🏆', text: 'Congratulations to our Tournament Champion!', cls:'winner-line' });
+      if (rounds.length > 0) {
+        let champion = null;
+        const lastRound = rounds[rounds.length - 1];
+        if (lastRound && lastRound[0] && lastRound[0][0]) champion = lastRound[0][0];
+
+        if (champion) {
+          lines.push({ n:'🏆', text: `Congratulations to ${winnerHTML(champion)} for winning the tournament!`, cls:'winner-line' });
+        } else {
+          lines.push({ n:'—', text:'── ACTIVE MATCHES ──', cls:'divider' });
+          
+          // Find the "current" active matches:
+          // We show matches in the earliest round that are NOT full (no winner) or have both slots filled.
+          let foundActive = false;
+          rounds.forEach((r, rIdx) => {
+            if (foundActive) return;
+            const playableMatches = [];
+            r.forEach((m, mIdx) => {
+              // A match is "Playable" if both slots are filled and it hasn't advanced to next round yet
+              // Actually, simplified: Show the first round that has TBD matches.
+              if (m[0] && m[1] && m[0] !== 'BYE' && m[1] !== 'BYE') {
+                 // Check if winner is already in next round
+                 const nextRound = rounds[rIdx + 1];
+                 if (nextRound) {
+                   const nextMIdx = Math.floor(mIdx / 2);
+                   const nextSIdx = mIdx % 2;
+                   if (nextRound[nextMIdx][nextSIdx] === m[0] || nextRound[nextMIdx][nextSIdx] === m[1]) {
+                     return; // Already solved
+                   }
+                 }
+                 playableMatches.push(m);
+              }
+            });
+
+            if (playableMatches.length > 0) {
+              playableMatches.forEach((m, i) => {
+                lines.push({ n: (i+1).toString(), text: `${m[0]} VS ${m[1]}`, cls: 'match-line' });
+                lines.push({ n: '⚡', text: '3... 2... 1... GO!', cls: 'small-line' });
+              });
+              foundActive = true;
+            }
+          });
+
+          if (!foundActive) {
+            lines.push({ n:'💡', text: 'Click on winners in the bracket above to advance!', cls:'info-line' });
+          }
+        }
       } else {
-        lines.push({ n:'💡', text: 'Paste names and click "Generate" above to see the bracket.', cls:'info-line' });
+        lines.push({ n:'💡', text: 'Paste names and click "Generate" to see the visual bracket.', cls:'info-line' });
       }
       return lines;
     },
@@ -417,41 +454,84 @@ function updateScore(team, delta) {
   refreshEventLines();
 }
 
-function generateBrackets() {
+function initTournament() {
   const input = document.getElementById('tourn-players');
-  const mode = document.getElementById('tourn-mode').value;
   if (!input) return;
-
-  // Robust parsing for both newlines and commas
-  const rawValue = input.value.replace(/,/g, '\n');
-  const names = rawValue.split('\n')
-    .map(n => n.trim())
-    .filter(n => n.length > 0);
-
-  if (names.length < 2) {
-    showToast('Add at least 2 players!');
-    return;
-  }
+  const names = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  if (names.length < 2) { showToast('Need at least 2 players!'); return; }
 
   shuffleArray(names);
-  const matchups = [];
-  const step = mode === '1v1' ? 2 : 4;
+  
+  // Calculate power of 2 bracket size
+  const size = Math.pow(2, Math.ceil(Math.log2(names.length)));
+  const roundsCount = Math.log2(size);
+  
+  const rounds = [];
+  // Round 1
+  const r1 = [];
+  for (let i = 0; i < size; i += 2) {
+    const p1 = names[i] || 'BYE';
+    const p2 = names[i+1] || 'BYE';
+    r1.push([p1, p2]);
+  }
+  rounds.push(r1);
 
-  for (let i = 0; i < names.length; i += step) {
-    const group = names.slice(i, i + step);
-    if (group.length === step) {
-      matchups.push(group);
-    } else {
-      // Handle remaining (Bye)
-      const padded = [...group];
-      while(padded.length < step) padded.push('BYE');
-      matchups.push(padded);
-    }
+  // Future Rounds (empty slots)
+  for (let r = 1; r < roundsCount; r++) {
+    const sub = [];
+    const count = size / Math.pow(2, r + 1);
+    for (let m = 0; m < count; m++) sub.push([null, null]);
+    rounds.push(sub);
   }
 
-  EVENTS.tournament.state.matchups = matchups;
+  EVENTS.tournament.state.rounds = rounds;
+  renderBracketView();
   refreshEventLines();
-  showToast(`Matchmaking complete: ${matchups.length} matchups.`);
+  showToast('Tournament tree generated!');
+}
+
+function resetTournament() {
+  EVENTS.tournament.state.rounds = [];
+  renderBracketView();
+  refreshEventLines();
+}
+
+function renderBracketView() {
+  const container = document.getElementById('bracket-view');
+  if (!container) return;
+  const rounds = EVENTS.tournament.state.rounds || [];
+  if (rounds.length === 0) { container.innerHTML = ''; return; }
+
+  container.innerHTML = rounds.map((r, rIdx) => {
+    const matches = r.map((m, mIdx) => {
+      // Slot 1
+      const s1 = `<div class="br-slot ${m[0]?'filled':''}" onclick="advanceWinner(${rIdx}, ${mIdx}, 0)">${m[0]||'TBD'}</div>`;
+      // Slot 2
+      const s2 = `<div class="br-slot ${m[1]?'filled':''}" onclick="advanceWinner(${rIdx}, ${mIdx}, 1)">${m[1]||'TBD'}</div>`;
+      return `<div class="br-match"><div class="br-label">Match ${mIdx+1}</div>${s1}${s2}</div>`;
+    }).join('');
+    
+    return `<div class="br-round"><div class="br-round-title">Round ${rIdx+1}</div>${matches}</div>`;
+  }).join('');
+}
+
+function advanceWinner(rIdx, mIdx, pIdx) {
+  const rounds = EVENTS.tournament.state.rounds;
+  const winner = rounds[rIdx][mIdx][pIdx];
+  if (!winner || winner === 'BYE' || winner === 'TBD') return;
+
+  // Is there a next round?
+  if (rIdx + 1 < rounds.length) {
+    const nextMatchIdx = Math.floor(mIdx / 2);
+    const nextSlotIdx = mIdx % 2;
+    rounds[rIdx+1][nextMatchIdx][nextSlotIdx] = winner;
+    showToast(`${winner} advanced!`);
+  } else {
+    showToast(`${winner} IS THE CHAMPION!`);
+  }
+
+  renderBracketView();
+  refreshEventLines();
 }
 
 function shuffleArray(array) {

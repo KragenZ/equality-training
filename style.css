@@ -657,6 +657,74 @@ body {
 .iq-label { font-weight: 700; color: var(--text-muted); font-size: 0.8rem; }
 .iq-val { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: var(--accent-p); min-width: 40px; text-align: center; }
 
+/* ---- Bracket Pro Visualizer ---- */
+.bracket-view {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  padding: 20px 0 40px;
+  margin-top: 20px;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for bracket */
+.bracket-view::-webkit-scrollbar { height: 6px; }
+.bracket-view::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+.br-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-width: 180px;
+  gap: 20px;
+}
+
+.br-round-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-p);
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+.br-match {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: 12px;
+  position: relative;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.br-match:hover { border-color: var(--border-bright); transform: scale(1.02); }
+
+.br-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.br-slot {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.br-slot.filled { color: #fff; }
+.br-slot:hover { background: rgba(168, 85, 247, 0.2); border-color: var(--accent-p); }
+
 .match-line {
   background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent) !important;
   border-left: 4px solid var(--accent-p) !important;
