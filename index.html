@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Equality Training — One Shot!</title>
+  <meta name="description" content="Training command center for Equality Training hosts. One-click copy scripts for FFA, Gladiators, TDM, Tournament, KOTH, Juggernaut, and Hunger Games."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div id="toast" class="toast" role="alert" aria-live="polite">
+    <span class="toast-icon">✓</span>
+    <span id="toast-text">Copied!</span>
+  </div>
+
+  <header class="header">
+    <div class="header-inner">
+    <!-- Brand -->
+    <div class="header-brand">
+      <div class="logo-container">
+        <!-- High-End Inline SVG Logo to ensure it never breaks again -->
+        <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" stroke="url(#logo-grad)" stroke-width="2" />
+          <path d="M50 20V80M25 40L50 30L75 40M25 60L50 70L75 60" stroke="url(#logo-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M25 40V60M75 40V60" stroke="var(--accent-p)" stroke-width="2" />
+          <defs>
+            <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+              <stop stop-color="var(--accent-p)" />
+              <stop offset="1" stop-color="var(--accent-s)" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <h1>Equality Training</h1>
+        <p class="tagline">One Shot!</p>
+      </div>
+    </div>
+      <div class="header-badge"><span class="pulse-dot"></span>Training Mode</div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Primary Tab Nav -->
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" id="tab-abbr" role="tab" aria-selected="true" onclick="switchTab('abbr')">
+        <span>⚡</span> Abbreviations
+      </button>
+      <button class="tab-btn" id="tab-events" role="tab" aria-selected="false" onclick="switchTab('events')">
+        <span>🎮</span> Events
+      </button>
+      <button class="tab-btn" id="tab-custom" role="tab" aria-selected="false" onclick="switchTab('custom')">
+        <span>✏️</span> Custom Messages
+      </button>
+    </nav>
+
+    <!-- ===== ABBREVIATIONS ===== -->
+    <section class="panel active" id="panel-abbr">
+      <div class="panel-header">
+        <h1 class="panel-title">Permission Abbreviations</h1>
+        <p class="panel-desc">One-click copy for standard permission responses.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card" style="--accent:#06b6d4">
+          <div class="card-label">PTA — Permission To AFK</div>
+          <div class="card-text">Granted. Face the wall you have 5 minutes max to return.</div>
+          <button class="copy-btn" onclick="copyText('Granted. Face the wall you have 5 minutes max to return.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#10b981">
+          <div class="card-label">PTL — Permission To Leave</div>
+          <div class="card-text">Granted. Thank You for joining this training.</div>
+          <button class="copy-btn" onclick="copyText('Granted. Thank You for joining this training.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#f59e0b">
+          <div class="card-label">PTC — Permission To Change</div>
+          <div class="card-text">Granted. Quickly change your weapon 2 minutes max to return.</div>
+          <button class="copy-btn" onclick="copyText('Granted. Quickly change your weapon 2 minutes max to return.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#ec4899">
+          <div class="card-label">PTR — Permission To Rejoin</div>
+          <div class="card-text">Granted. DM me for the new link. You have 5 minutes max to return.</div>
+          <button class="copy-btn" onclick="copyText('Granted. DM me for the new link. You have 5 minutes max to return.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#7c3aed">
+          <div class="card-label">PTS — Permission To Speak</div>
+          <div class="card-text">Speak. Don't use it for unnecessary conversation.</div>
+          <button class="copy-btn" onclick="copyText('Speak. Don\'t use it for unnecessary conversation.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#10b981">
+          <div class="card-label">PTS — Turn ON</div>
+          <div class="card-text">PTS is now ON. You may speak freely.</div>
+          <button class="copy-btn" onclick="copyText('PTS is now ON. You may speak freely.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#ef4444">
+          <div class="card-label">PTS — Turn OFF</div>
+          <div class="card-text">PTS is now OFF. No speaking unless given permission.</div>
+          <button class="copy-btn" onclick="copyText('PTS is now OFF. No speaking unless given permission.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#ef4444">
+          <div class="card-label">⚠️ Strike Warning</div>
+          <div class="card-text">That is a strike. One more and you will be removed from this training.</div>
+          <button class="copy-btn" onclick="copyText('That is a strike. One more and you will be removed from this training.',this)">📋 Copy</button>
+        </div>
+        <div class="card" style="--accent:#ef4444">
+          <div class="card-label">❌ Removal</div>
+          <div class="card-text">You have been removed from this training. Please leave the server.</div>
+          <button class="copy-btn" onclick="copyText('You have been removed from this training. Please leave the server.',this)">📋 Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EVENTS ===== -->
+    <section class="panel" id="panel-events">
+      <!-- Event Selector Grid -->
+      <div id="event-selector">
+        <div class="panel-header">
+          <h2 class="panel-title">Training Events</h2>
+          <p class="panel-desc">Select an event to view its script lines.</p>
+        </div>
+        <div class="event-grid">
+          <button class="event-card" onclick="openEvent('ffa')" id="evbtn-ffa">
+            <div class="event-card-icon">⚔️</div>
+            <div class="event-card-name">FFA</div>
+            <div class="event-card-sub">Free For All</div>
+          </button>
+          <button class="event-card" onclick="openEvent('glads')" id="evbtn-glads">
+            <div class="event-card-icon">🛡️</div>
+            <div class="event-card-name">Gladiators</div>
+            <div class="event-card-sub">Team vs Team</div>
+          </button>
+          <button class="event-card" onclick="openEvent('tdm')" id="evbtn-tdm">
+            <div class="event-card-icon">💥</div>
+            <div class="event-card-name">TDM</div>
+            <div class="event-card-sub">Team Deathmatch</div>
+          </button>
+          <button class="event-card" onclick="openEvent('tournament')" id="evbtn-tournament">
+            <div class="event-card-icon">🏆</div>
+            <div class="event-card-name">Tournament</div>
+            <div class="event-card-sub">1v1 / 2v2</div>
+          </button>
+          <button class="event-card" onclick="openEvent('koth')" id="evbtn-koth">
+            <div class="event-card-icon">👑</div>
+            <div class="event-card-name">KOTH</div>
+            <div class="event-card-sub">King Of The Hill</div>
+          </button>
+          <button class="event-card" onclick="openEvent('jugg')" id="evbtn-jugg">
+            <div class="event-card-icon">💀</div>
+            <div class="event-card-name">Juggernaut</div>
+            <div class="event-card-sub">1 vs All</div>
+          </button>
+          <button class="event-card" onclick="openEvent('hg')" id="evbtn-hg">
+            <div class="event-card-icon">🌿</div>
+            <div class="event-card-name">Hunger Games</div>
+            <div class="event-card-sub">Last Man Standing</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Individual Event Panels -->
+      <div id="event-panel" class="event-panel hidden">
+        <button class="back-btn" onclick="closeEvent()">← Back to Events</button>
+        <div id="event-content"></div>
+      </div>
+    </section>
+
+    <!-- ===== CUSTOM MESSAGES ===== -->
+    <section class="panel" id="panel-custom">
+      <div class="panel-header">
+        <h2 class="panel-title">Custom Messages</h2>
+        <p class="panel-desc">Save your own frequently used messages.</p>
+      </div>
+      <div class="custom-form">
+        <input type="text" id="custom-label" class="field-input" placeholder="Label (e.g. Rules Reminder)" maxlength="60" aria-label="Label"/>
+        <textarea id="custom-text" class="field-input field-textarea" placeholder="Your message..." rows="3" aria-label="Message"></textarea>
+        <button class="btn-primary" onclick="addCustomMessage()">➕ Save Message</button>
+      </div>
+      <div class="custom-list" id="custom-list">
+        <div class="empty-state" id="custom-empty">
+          <div style="font-size:2rem;opacity:.5">📝</div>
+          <div>No custom messages yet. Add one above!</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Equality Training — Press 1–3 to switch tabs · Made for training hosts</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
