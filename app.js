@@ -896,14 +896,108 @@ closeEvent = () => {
   originalCloseEvent();
 };
 
+function setAccent(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme_accent', theme);
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.remove('active');
+    if (d.classList.contains('dot-' + theme)) d.classList.add('active');
+  });
+  showToast('Theme set to ' + theme.toUpperCase());
+}
+
+function loadTheme() {
+  const t = localStorage.getItem('theme_accent') || 'purple';
+  setAccent(t);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderCustom();
   loadTheme();
   renderHistory();
   loadRoutine();
   updateAnalytics();
+  initVoidCanvas();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
 });
+
+// ---- Elite Pro: Void Particles ----
+let _canvas, _ctx, _particles = [];
+let _particleAnimationId;
+let _stopParticles = false;
+
+function initVoidCanvas() {
+  _canvas = document.getElementById('void-canvas');
+  if (!_canvas) return;
+  _ctx = _canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  createParticles();
+  animateParticles();
+}
+
+function resizeCanvas() {
+  _canvas.width = window.innerWidth;
+  _canvas.height = window.innerHeight;
+}
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * _canvas.width;
+    this.y = Math.random() * _canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.5 + 0.1;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > _canvas.width || this.y < 0 || this.y > _canvas.height) {
+      this.reset();
+    }
+  }
+  draw() {
+    const accent = getComputedStyle(document.body).getPropertyValue('--accent-p').trim();
+    _ctx.fillStyle = accent;
+    _ctx.globalAlpha = this.opacity;
+    _ctx.beginPath();
+    _ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    _ctx.fill();
+  }
+}
+
+function createParticles() {
+  _particles = [];
+  const count = Math.floor((window.innerWidth * window.innerHeight) / 15000);
+  for (let i = 0; i < count; i++) _particles.push(new Particle());
+}
+
+function animateParticles() {
+  if (_stopParticles) return;
+  _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+  _particles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+  _particleAnimationId = requestAnimationFrame(animateParticles);
+}
+
+function toggleParticles(checked) {
+  _stopParticles = !checked;
+  const label = document.querySelector('label[for="perf-toggle"]');
+  if (label) label.textContent = _stopParticles ? 'STATIC MODE (ON)' : 'STATIC MODE (OFF)';
+  
+  if (!_stopParticles) animateParticles();
+  else {
+    cancelAnimationFrame(_particleAnimationId);
+    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+  }
+}
 
 // ---- Elite Pro: Tactical Routine ----
 let _routine = JSON.parse(localStorage.getItem('training_routine')) || [];

@@ -10,7 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
-<body>
+<body data-theme="purple">
+  <canvas id="void-canvas"></canvas>
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -263,6 +264,7 @@
             <div class="empty-state">No events in your routine yet. Add some above!</div>
           </div>
         </div>
+        </div>
       </div>
     </section>
 
@@ -370,12 +372,15 @@
 
   <footer class="footer">
     <div class="footer-inner">
-      <div class="theme-toggles">
-        <span class="footer-label">Void Accent:</span>
+      <div class="theme-dots">
         <button class="theme-dot dot-purple active" onclick="setAccent('purple')" title="Void Purple"></button>
-        <button class="theme-dot dot-blue" onclick="setAccent('blue')" title="Nebula Blue"></button>
+        <button class="theme-dot dot-blue" onclick="setAccent('blue')" title="Glacial Blue"></button>
         <button class="theme-dot dot-red" onclick="setAccent('red')" title="Crimson Void"></button>
         <button class="theme-dot dot-gold" onclick="setAccent('gold')" title="Solar Gold"></button>
+      </div>
+      <div style="margin-left:20px;display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="perf-toggle" onchange="toggleParticles(this.checked)" checked style="cursor:pointer">
+        <label for="perf-toggle" style="font-size:0.6rem;font-weight:900;color:var(--text-muted);cursor:pointer;white-space:nowrap">STATIC MODE (OFF)</label>
       </div>
       <div class="footer-info">Equality Training — Press 1–6 to switch tabs</div>
     </div>
