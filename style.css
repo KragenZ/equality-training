@@ -63,6 +63,15 @@
   border: 2px solid var(--bg-dark);
 }
 
+#void-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   background-color: var(--bg-dark);
@@ -121,7 +130,7 @@ body {
   background: rgba(3, 3, 5, 0.85);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-dim);
-  padding: 12px 0;
+  padding: 8px 0; /* Optimized from 12px */
 }
 
 .header-inner {
@@ -132,12 +141,13 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  margin-bottom: 4px; /* Added margin bot for compactness */
 }
 
 .header-utils {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px; /* Optimized from 20px */
   flex: 1;
   justify-content: flex-end;
 }
@@ -425,10 +435,31 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Panel Headers ---- */
-.panel-header { margin-bottom: 32px; border-left: 3px solid var(--accent-p); padding-left: 20px; }
-.panel-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
-.panel-desc { color: var(--text-dim); font-size: 0.9rem; }
+/* ---- Panels (Tab Content) ---- */
+.panel {
+  display: none;
+  animation: fadeIn 0.4s ease-out;
+  padding: 15px 20px; /* Optimized padding */
+}
+.panel.active {
+  display: block;
+}
+
+.panel-header {
+  margin-bottom: 12px; /* Optimized from 20px */
+  border-left: 3px solid var(--accent-p); padding-left: 20px;
+}
+.panel-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff; margin-bottom: 4px;
+}
+.panel-desc {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin-bottom: 15px; /* Added margin */
+}
 
 /* ---- Fields ---- */
 .field-input {
