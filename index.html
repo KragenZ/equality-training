@@ -113,6 +113,9 @@
       <button class="tab-btn active" id="tab-abbr" role="tab" aria-selected="true" onclick="switchTab('abbr')">
         <span>⚡</span> Abbreviations
       </button>
+      <button class="tab-btn" id="tab-legends" role="tab" aria-selected="false" onclick="switchTab('legends')">
+        <span>🏆</span> Legends
+      </button>
       <button class="tab-btn" id="tab-events" role="tab" aria-selected="false" onclick="switchTab('events')">
         <span>🎮</span> Events
       </button>
@@ -189,6 +192,33 @@
           </div>
           <button class="btn-primary" onclick="copyAnnounce()" style="margin-top: 15px; background: var(--accent-p);">📋 Copy for Discord</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== LEGENDS (HALL OF VETERANS) ===== -->
+    <section class="panel" id="panel-legends">
+      <div class="panel-header">
+        <h1 class="panel-title">🏆 Hall of Legends</h1>
+        <p class="panel-desc">Persistent legacy of training champions. Ranks are earned through victories.</p>
+      </div>
+
+      <div class="cards-grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
+         <div class="card legend-card" style="padding: 0; overflow: visible;">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border-dim); display:flex; justify-content:space-between; align-items:center; gap: 20px; flex-wrap: wrap;">
+               <div style="position:relative; flex: 1; min-width: 200px;">
+                  <span style="position:absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                  <input type="text" id="legend-search" class="field-input" placeholder="Search legend..." oninput="renderLegends()" style="padding-left: 35px; background: rgba(0,0,0,0.5);">
+               </div>
+               <div style="display:flex; gap: 8px;">
+                  <button class="btn-primary" onclick="recordManualWin()" style="font-size: 0.75rem; padding: 10px 16px;">➕ Manual Record</button>
+                  <button class="btn-primary" onclick="clearLegends()" style="background:transparent; border:1px solid var(--text-muted); color: var(--text-muted); font-size: 0.75rem; padding: 10px 16px;">🗑️ Reset Data</button>
+               </div>
+            </div>
+            <div id="legend-list" class="legend-list-content" style="max-height: 600px; overflow-y: auto;">
+               <!-- Legends injected here -->
+               <div class="empty-state">No legends have been recorded yet. Win a tournament to begin!</div>
+            </div>
+         </div>
       </div>
     </section>
 

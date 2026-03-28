@@ -37,6 +37,12 @@
   --shadow-glow: 0 0 50px rgba(168, 85, 247, 0.12);
   --shadow-elite: 0 20px 40px rgba(0,0,0,0.6);
   --transition: 0.4s cubic-bezier(0.2, 0, 0, 1);
+
+  /* Rank Colors */
+  --rank-recruit: #94a3b8;
+  --rank-veteran: #cd7f32;
+  --rank-elite: #e5e4e2;
+  --rank-legend: #ffca28;
 }
 
 /* Theme Variates */
@@ -1262,4 +1268,51 @@ body {
   .logo-title { font-size: 1.1rem; }
   .logo-img { height: 40px; width: 40px; }
   .header-badge { display: none; }
+}
+
+/* ---- Hall of Legends ---- */
+.legend-list-content {
+  display: flex;
+  flex-direction: column;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-dim);
+  transition: var(--transition);
+}
+.legend-item:last-child { border-bottom: none; }
+.legend-item:hover { background: rgba(255,255,255,0.02); }
+
+.legend-rank-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  border: 1px solid var(--border-dim);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.legend-info { flex: 1; }
+.legend-name { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 2px; }
+.legend-subtitle { font-size: 0.75rem; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.legend-score {
+  text-align: right;
+  min-width: 80px;
+}
+.legend-count { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: var(--accent-p); }
+.legend-wins-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+
+/* Rank Specific Treatments */
+.legend-item.rank-veteran .legend-rank-icon { border-color: var(--rank-veteran); color: var(--rank-veteran); box-shadow: 0 0 20px rgba(205, 127, 50, 0.2); }
+.legend-item.rank-elite .legend-rank-icon { border-color: var(--rank-elite); color: var(--rank-elite); box-shadow: 0 0 20px rgba(229, 228, 226, 0.2); }
+.legend-item.rank-legend .legend-rank-icon { border-color: var(--rank-legend); color: var(--rank-legend); box-shadow: 0 0 30px rgba(255, 202, 40, 0.4); animation: legend-pulse 3s infinite alternate; }
+
+@keyframes legend-pulse {
+  from { transform: scale(1); filter: brightness(1); }
+  to { transform: scale(1.1); filter: brightness(1.2); }
 }

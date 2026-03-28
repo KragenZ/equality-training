@@ -10,6 +10,7 @@ function switchTab(name) {
   // When switching to events, always show selector
   if (name === 'events') closeEvent();
   if (name === 'roster') { renderRoster(); updateAnalytics(); }
+  if (name === 'legends') renderLegends();
   if (name === 'templates') renderTemplates();
   if (name === 'routine') renderRoutine();
   if (name === 'announce') generateAnnouncePreview();
@@ -55,7 +56,7 @@ const EVENTS = {
     desc: 'All attendees go into the pit and fight. Last person standing wins and stands beside the trainer. Run up to 2 FFAs to get 2 team captains for Gladiators or TDM.',
     config: [
       { id: 'ffa-round', label: 'Rounds', type: 'select', options: ['1 Round','2 Rounds'] },
-      { id: 'ffa-winner', label: 'Round 1 Winner', type: 'text', placeholder: 'e.g. PlayerName' },
+      { id: 'ffa-winner', label: 'Round 1 Winner', type: 'text', placeholder: 'e.g. PlayerName', isWinner: true },
     ],
     buildLines: () => {
       const r2 = document.getElementById('ffa-round')?.value === '2 Rounds';
@@ -248,7 +249,7 @@ const EVENTS = {
     icon: '💀', name: 'Juggernaut', full: 'Juggernaut (Jugg)',
     desc: '1 player is selected as the Juggernaut with 10 lives. If they die 10 times, participants win. If they wipe the server first, they win.',
     config: [
-      { id: 'jugg-player', label: 'Juggernaut', type: 'text', placeholder: 'e.g. PlayerName' },
+      { id: 'jugg-player', label: 'Juggernaut', type: 'text', placeholder: 'e.g. PlayerName', isWinner: true },
       { id: 'jugg-lives', label: 'Life Tracker', type: 'custom', render: () => `
         <div class="iq-tracker">
           <span class="iq-label">❤️ Lives:</span>
@@ -283,6 +284,7 @@ const EVENTS = {
     icon: '🌿', name: 'Hunger Games', full: 'Hunger Games (HG)',
     desc: 'Players hide in Ghoul or CCG side for a grace period. Use the IQ Randomizer below to assign initial sides if you want.',
     config: [
+      { id: 'hg-winner', label: 'HG Winner', type: 'text', placeholder: 'e.g. PlayerName', isWinner: true },
       { id: 'hg-players', label: 'Participants', type: 'textarea', placeholder: 'Paste players to randomize sides...' },
       { id: 'hg-rand', label: 'Randomizer', type: 'custom', render: () => `<button class="btn-primary" onclick="randomizeHGSides()" style="width:100%">🎭 Assign Random Sides</button>` }
     ],
@@ -302,6 +304,11 @@ const EVENTS = {
         lines.push({ n:'👹', text: `Ghouls (Hide in Ghoul Area): ${ghouls}`, cls:'' });
         lines.push({ n:'⚔️', text: `CCGs (Hide in CCG Area): ${ccgs}`, cls:'' });
         lines.push({ n:'⚡', text: 'Go hide now! PVP ON in 5 minutes.', cls: 'small-line' });
+      }
+      const w = document.getElementById('hg-winner')?.value.trim();
+      if (w) {
+        lines.push({ n:'—', text:'── Game Over ──', cls:'divider' });
+        lines.push({ n:'🏆', text: winnerHTML(w) + ' is the winner of Hunger Games!', cls:'winner-line' });
       }
       return lines;
     },
@@ -357,9 +364,13 @@ function openEvent(key) {
           <div style="flex:1">${c.render()}</div>
         </div>`;
       } else {
+        const winnerBtn = c.isWinner ? `<button class="btn-primary" onclick="recordWin(document.getElementById('${c.id}').value)" style="background:#ffca28; color:#000; width:40px; font-size:1rem;" title="Record Win to Legends">🏆</button>` : '';
         return `<div class="config-row">
           <span class="config-label">${c.label}</span>
-          <input type="text" id="${c.id}" class="field-input" placeholder="${c.placeholder||''}" oninput="refreshEventLines()" aria-label="${c.label}" list="roster-datalist" style="width:200px"/>
+          <div style="display:flex; gap:8px; flex:1;">
+            <input type="text" id="${c.id}" class="field-input" placeholder="${c.placeholder||''}" oninput="refreshEventLines()" aria-label="${c.label}" list="roster-datalist" style="flex:1"/>
+            ${winnerBtn}
+          </div>
         </div>`;
       }
     }).join('');
@@ -516,6 +527,7 @@ function advanceWinner(rIdx, mIdx, pIdx) {
     showToast(`${winner} advanced!`);
   } else {
     showToast(`${winner} IS THE CHAMPION!`);
+    recordWin(winner);
   }
 
   renderBracketView();
@@ -557,10 +569,86 @@ function randomizeHGSides() {
   showToast('Sides assigned evenly!');
 }
 
-// ---- Custom Messages ----
-const STORE = 'equality-training-v1';
-function loadMsgs() { try { return JSON.parse(localStorage.getItem(STORE)) || []; } catch { return []; } }
-function saveMsgs(m) { localStorage.setItem(STORE, JSON.stringify(m)); }
+// ---- Elite Pro: Legends (Hall of Veterans) ----
+let _legends = JSON.parse(localStorage.getItem('hall_of_legends_v1')) || {};
+
+function recordWin(nameInput) {
+  if (!nameInput) return;
+  // Handle Duo Winners (e.g. "Name1 & Name2")
+  const names = nameInput.split('&').map(n => n.trim()).filter(n => n.length > 0);
+  
+  names.forEach(name => {
+    const oldVal = _legends[name] || 0;
+    _legends[name] = oldVal + 1;
+    
+    // Milestone Check
+    const newVal = _legends[name];
+    if (newVal === 5) showToast(`LEGENDARY: ${name} is now a VETERAN! 🥉`);
+    if (newVal === 10) showToast(`ELITE STATUS: ${name} is now an ELITE! 🥈`);
+    if (newVal === 20) showToast(`ASCENDED: ${name} is now a LEGEND! 🥇`);
+  });
+  
+  saveLegends();
+  renderLegends();
+  showToast(`Win(s) recorded for: ${names.join(', ')}`);
+}
+
+function saveLegends() { localStorage.setItem('hall_of_legends_v1', JSON.stringify(_legends)); }
+
+function renderLegends() {
+  const container = document.getElementById('legend-list');
+  if (!container) return;
+  const search = document.getElementById('legend-search').value.toLowerCase();
+  
+  const sorted = Object.entries(_legends)
+    .filter(([name]) => name.toLowerCase().includes(search))
+    .sort((a,b) => b[1] - a[1]);
+
+  if (sorted.length === 0) {
+    container.innerHTML = `<div class="empty-state">${search ? 'No legends matching search.' : 'No legends recorded yet.'}</div>`;
+    return;
+  }
+
+  container.innerHTML = sorted.map(([name, wins]) => {
+    let rank = 'Recruit';
+    let cls = 'rank-recruit';
+    let icon = '🛡️';
+    
+    if (wins >= 20) { rank = 'Legend'; cls = 'rank-legend'; icon = '🥇'; }
+    else if (wins >= 10) { rank = 'Elite'; cls = 'rank-elite'; icon = '🥈'; }
+    else if (wins >= 5) { rank = 'Veteran'; cls = 'rank-veteran'; icon = '🥉'; }
+    
+    return `
+      <div class="legend-item ${cls}">
+        <div class="legend-rank-icon">${icon}</div>
+        <div class="legend-info">
+          <div class="legend-name">${escHTML(name)}</div>
+          <div class="legend-subtitle">${rank}</div>
+        </div>
+        <div class="legend-score">
+          <div class="legend-count">${wins}</div>
+          <div class="legend-wins-label">Wins</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function recordManualWin() {
+  const name = prompt("Enter Player Name (use '&' for Duos):");
+  if (name) recordWin(name);
+}
+
+function clearLegends() {
+  if (confirm("Are you sure? This will wipe the PERSISTENT Hall of Legends history forever!")) {
+    _legends = {};
+    saveLegends();
+    renderLegends();
+    showToast("Legends database cleared.");
+  }
+}
+
+// ---- CUSTOM MESSAGES ----
 
 function renderCustom() {
   const list  = document.getElementById('custom-list');
