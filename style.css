@@ -17,9 +17,10 @@
   --bg-card:       rgba(15, 15, 25, 0.4);
   --bg-glass:      rgba(15, 15, 25, 0.7);
   
-  --accent-p:      #a855f7; /* Void Purple */
-  --accent-s:      #7c3aed; /* Deep Violet */
-  --accent-t:      #6366f1; /* Indigo */
+  /* Primary Accents (Dynamic) */
+  --accent-p:      #a855f7; /* Main Accent */
+  --accent-s:      #7c3aed; /* Secondary */
+  --accent-t:      #6366f1; /* Tertiary */
   
   --border-dim:    rgba(168, 85, 247, 0.1);
   --border-bright: rgba(168, 85, 247, 0.3);
@@ -34,6 +35,23 @@
   
   --shadow-glow: 0 0 40px rgba(168, 85, 247, 0.15);
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme Variates */
+[data-theme="blue"] {
+  --accent-p: #06b6d4; --accent-s: #0891b2; --accent-t: #0e7490;
+  --border-dim: rgba(6, 182, 212, 0.1); --border-bright: rgba(6, 182, 212, 0.3);
+  --shadow-glow: 0 0 40px rgba(6, 182, 212, 0.15);
+}
+[data-theme="red"] {
+  --accent-p: #ef4444; --accent-s: #dc2626; --accent-t: #b91c1c;
+  --border-dim: rgba(239, 68, 68, 0.1); --border-bright: rgba(239, 68, 68, 0.3);
+  --shadow-glow: 0 0 40px rgba(239, 68, 68, 0.15);
+}
+[data-theme="gold"] {
+  --accent-p: #f59e0b; --accent-s: #d97706; --accent-t: #b45309;
+  --border-dim: rgba(245, 158, 11, 0.1); --border-bright: rgba(245, 158, 11, 0.3);
+  --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.15);
 }
 
 /* ---- Scrollbar ---- */
@@ -113,6 +131,65 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px;
+}
+
+.header-utils {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+/* ---- Timer Widget ---- */
+.timer-widget {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.timer-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-p);
+  min-width: 80px;
+}
+.timer-controls { display: flex; gap: 4px; }
+.timer-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  padding: 4px;
+}
+.timer-btn:hover { color: var(--accent-p); }
+
+/* ---- Command Bar ---- */
+.command-bar-container {
+  overflow-x: auto;
+  max-width: 300px;
+  -webkit-overflow-scrolling: touch;
+}
+.command-bar-container::-webkit-scrollbar { display: none; }
+
+.command-bar {
+  display: flex;
+  gap: 8px;
+}
+.command-bar .icon-btn {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: auto;
+  padding: 0 12px;
+  height: 32px;
 }
 
 .logo {
@@ -739,6 +816,72 @@ body {
   border: none !important;
   background: transparent !important;
 }
+
+/* ---- Roster Styles ---- */
+.roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.roster-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+.roster-item:hover { border-color: var(--border-bright); transform: translateX(5px); }
+
+.roster-name { font-weight: 700; flex: 1; }
+
+.status-btns {
+  display: flex;
+  gap: 6px;
+}
+.btn-status {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-dim);
+  color: var(--text-dim);
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-status:hover { border-color: var(--accent-p); }
+.btn-status.active-status { background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; }
+.btn-status.failed-status { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
+.btn-status.excused-status { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border-color: #f59e0b; }
+
+/* ---- Theme Toggles ---- */
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.theme-toggles { display: flex; align-items: center; gap: 12px; }
+.footer-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.theme-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+.theme-dot:hover { transform: scale(1.3); }
+.theme-dot.active { border-color: #fff; transform: scale(1.2); }
+.dot-purple { background: #a855f7; }
+.dot-blue { background: #06b6d4; }
+.dot-red { background: #ef4444; }
+.dot-gold { background: #f59e0b; }
 
 /* ---- Toast ---- */
 .toast {

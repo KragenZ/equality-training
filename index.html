@@ -25,27 +25,30 @@
   <header class="header">
     <div class="header-inner">
     <!-- Brand -->
-    <div class="header-brand">
-      <div class="logo-container">
-        <!-- High-End Inline SVG Logo to ensure it never breaks again -->
-        <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="48" stroke="url(#logo-grad)" stroke-width="2" />
-          <path d="M50 20V80M25 40L50 30L75 40M25 60L50 70L75 60" stroke="url(#logo-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M25 40V60M75 40V60" stroke="var(--accent-p)" stroke-width="2" />
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-              <stop stop-color="var(--accent-p)" />
-              <stop offset="1" stop-color="var(--accent-s)" />
-            </linearGradient>
-          </defs>
-        </svg>
+      <div class="header-badge"><span class="pulse-dot"></span><span id="header-status">Training Mode</span></div>
+    </div>
+    
+    <!-- Timer & Command Bar -->
+    <div class="header-utils">
+      <div class="timer-widget" id="timer-box">
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="timer-controls">
+          <button class="timer-btn" id="timer-toggle" onclick="toggleTimer()">▶</button>
+          <button class="timer-btn" onclick="resetTimer()">↺</button>
+        </div>
       </div>
-      <div>
-        <h1>Equality Training</h1>
-        <p class="tagline">One Shot!</p>
+      <div class="command-bar-container">
+        <div class="command-bar" id="command-bar">
+          <button class="icon-btn" onclick="copyQuick(':m ')" title="Announcement">:m</button>
+          <button class="icon-btn" onclick="copyQuick(':kill ')" title="Kill">:kill</button>
+          <button class="icon-btn" onclick="copyQuick(':kick ')" title="Kick">:kick</button>
+          <button class="icon-btn" onclick="copyQuick(':tp ')" title="Teleport">:tp</button>
+          <button class="icon-btn" onclick="copyQuick(':slock')" title="Server Lock">:slock</button>
+          <button class="icon-btn" onclick="copyQuick(':unslock')" title="Unlock">:unslock</button>
+          <button class="icon-btn" onclick="copyQuick(':re ')" title="Refresh">:re</button>
+        </div>
       </div>
     </div>
-      <div class="header-badge"><span class="pulse-dot"></span>Training Mode</div>
     </div>
   </header>
 
@@ -58,8 +61,11 @@
       <button class="tab-btn" id="tab-events" role="tab" aria-selected="false" onclick="switchTab('events')">
         <span>🎮</span> Events
       </button>
+      <button class="tab-btn" id="tab-roster" role="tab" aria-selected="false" onclick="switchTab('roster')">
+        <span>📋</span> Roster
+      </button>
       <button class="tab-btn" id="tab-custom" role="tab" aria-selected="false" onclick="switchTab('custom')">
-        <span>✏️</span> Custom Messages
+        <span>✏️</span> Custom
       </button>
     </nav>
 
@@ -172,6 +178,30 @@
       </div>
     </section>
 
+    <!-- ===== ROSTER ===== -->
+    <section class="panel" id="panel-roster">
+      <div class="panel-header">
+        <h2 class="panel-title">Attendance Roster</h2>
+        <p class="panel-desc">Track attendees and their status. Perfect for Discord credits.</p>
+      </div>
+      <div class="config-section">
+        <div class="config-row" style="align-items: flex-start;">
+          <span class="config-label">Import Names</span>
+          <textarea id="roster-input" class="field-input field-textarea" placeholder="Paste names (newline or comma separated)..." style="width:100%"></textarea>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button class="btn-primary" onclick="initRoster()" style="flex:1">📋 Update Roster</button>
+          <button class="btn-primary" onclick="generateTrainingReport()" style="flex:1;background:var(--accent-t)">📊 Copy Summary Report</button>
+        </div>
+      </div>
+      <div class="roster-list" id="roster-list">
+        <div class="empty-state" id="roster-empty">
+          <div style="font-size:2rem;opacity:.5">👥</div>
+          <div>No players in roster. Import some above!</div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== CUSTOM MESSAGES ===== -->
     <section class="panel" id="panel-custom">
       <div class="panel-header">
@@ -192,7 +222,18 @@
     </section>
   </main>
 
-  <footer class="footer">Equality Training — Press 1–3 to switch tabs · Made for training hosts</footer>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="theme-toggles">
+        <span class="footer-label">Void Accent:</span>
+        <button class="theme-dot dot-purple active" onclick="setAccent('purple')" title="Void Purple"></button>
+        <button class="theme-dot dot-blue" onclick="setAccent('blue')" title="Nebula Blue"></button>
+        <button class="theme-dot dot-red" onclick="setAccent('red')" title="Crimson Void"></button>
+        <button class="theme-dot dot-gold" onclick="setAccent('gold')" title="Solar Gold"></button>
+      </div>
+      <div class="footer-info">Equality Training — Press 1–4 to switch tabs</div>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

@@ -9,6 +9,7 @@ function switchTab(name) {
   if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
   // When switching to events, always show selector
   if (name === 'events') closeEvent();
+  if (name === 'roster') renderRoster();
 }
 
 // ---- Toast ----
@@ -622,7 +623,8 @@ document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea,select')) return;
   if (e.key === '1') switchTab('abbr');
   else if (e.key === '2') switchTab('events');
-  else if (e.key === '3') switchTab('custom');
+  else if (e.key === '3') switchTab('roster');
+  else if (e.key === '4') switchTab('custom');
   else if (e.key === 'Escape' && _currentEvent) closeEvent();
 });
 
@@ -632,4 +634,130 @@ document.addEventListener('keydown', e => {
 });
 
 // ---- Init ----
-document.addEventListener('DOMContentLoaded', renderCustom);
+document.addEventListener('DOMContentLoaded', () => {
+  renderCustom();
+  loadTheme();
+  // Persistent timer check
+  if (localStorage.getItem('timer_running') === 'true') toggleTimer();
+});
+
+// ---- Elite Pro: Timer ----
+let _timerInt = null;
+let _seconds = parseInt(localStorage.getItem('timer_seconds')) || 0;
+
+function toggleTimer() {
+  const btn = document.getElementById('timer-toggle');
+  const status = document.getElementById('header-status');
+  if (_timerInt) {
+    clearInterval(_timerInt); _timerInt = null;
+    btn.textContent = '▶';
+    status.textContent = 'Training Paused';
+    localStorage.setItem('timer_running', 'false');
+  } else {
+    _timerInt = setInterval(updateTimer, 1000);
+    btn.textContent = '⏸';
+    status.textContent = 'Training Live';
+    localStorage.setItem('timer_running', 'true');
+  }
+}
+
+function updateTimer() {
+  _seconds++;
+  localStorage.setItem('timer_seconds', _seconds);
+  const h = Math.floor(_seconds / 3600).toString().padStart(2,'0');
+  const m = Math.floor((_seconds % 3600) / 60).toString().padStart(2,'0');
+  const s = (_seconds % 60).toString().padStart(2,'0');
+  document.getElementById('timer-display').textContent = `${h}:${m}:${s}`;
+}
+
+function resetTimer() {
+  if (_timerInt) toggleTimer();
+  _seconds = 0;
+  localStorage.setItem('timer_seconds', 0);
+  document.getElementById('timer-display').textContent = '00:00:00';
+}
+
+// ---- Elite Pro: Quick Commands ----
+function copyQuick(cmd) {
+  copyText(cmd);
+}
+
+// ---- Elite Pro: Roster ----
+let _roster = JSON.parse(localStorage.getItem('roster_data')) || [];
+
+function initRoster() {
+  const input = document.getElementById('roster-input');
+  const raw = input.value.replace(/,/g, '\n').split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  if (raw.length === 0) return;
+  
+  _roster = raw.map(name => ({ name, status: 'active' }));
+  saveRoster();
+  renderRoster();
+  input.value = '';
+  showToast(`Imported ${raw.length} players!`);
+}
+
+function saveRoster() { localStorage.setItem('roster_data', JSON.stringify(_roster)); }
+
+function renderRoster() {
+  const list = document.getElementById('roster-list');
+  const empty = document.getElementById('roster-empty');
+  list.querySelectorAll('.roster-item').forEach(e => e.remove());
+  
+  if (_roster.length === 0) { empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  _roster.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'roster-item';
+    item.innerHTML = `
+      <div class="roster-name">${escHTML(p.name)}</div>
+      <div class="status-btns">
+        <button class="btn-status ${p.status==='active'?'active-status':''}" onclick="setRosterStatus(${i},'active')">Active</button>
+        <button class="btn-status ${p.status==='failed'?'failed-status':''}" onclick="setRosterStatus(${i},'failed')">Failed</button>
+        <button class="btn-status ${p.status==='excused'?'excused-status':''}" onclick="setRosterStatus(${i},'excused')">Excused</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function setRosterStatus(idx, status) {
+  _roster[idx].status = status;
+  saveRoster();
+  renderRoster();
+}
+
+function generateTrainingReport() {
+  if (_roster.length === 0) { showToast('Roster is empty!'); return; }
+  const active = _roster.filter(p => p.status === 'active').map(p => p.name);
+  const failed = _roster.filter(p => p.status === 'failed').map(p => p.name);
+  
+  const h = Math.floor(_seconds / 3600);
+  const m = Math.floor((_seconds % 3600) / 60);
+
+  const report = [
+    `📊 **EQUALITY TRAINING REPORT**`,
+    `⏱ **Duration:** ${h}h ${m}m`,
+    `✅ **Survivors (${active.length}):** ${active.join(', ') || 'None'}`,
+    `❌ **Failed (${failed.length}):** ${failed.join(', ') || 'None'}`,
+    `🏆 **Congratulations to all survivors!**`
+  ].join('\n');
+  
+  copyText(report);
+}
+
+// ---- Elite Pro: Themes ----
+function setAccent(color) {
+  document.body.setAttribute('data-theme', color);
+  localStorage.setItem('void_theme', color);
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.remove('active');
+    if (d.classList.contains('dot-' + color)) d.classList.add('active');
+  });
+}
+
+function loadTheme() {
+  const t = localStorage.getItem('void_theme') || 'purple';
+  setAccent(t);
+}
