@@ -344,14 +344,18 @@
           <span class="config-label">Import Names</span>
           <textarea id="roster-input" class="field-input field-textarea" placeholder="Paste names or quickly upload a screenshot..." style="width:100%"></textarea>
         </div>
-        <div style="display:flex;gap:12px;margin-bottom:8px;">
+        <div style="display:flex;gap:12px;margin-bottom:8px;align-items:center;">
           <input type="file" id="roster-ocr-input" accept="image/*" style="display:none;" onchange="processRosterOCR(event)" />
           <button class="btn-primary" id="btn-ocr" onclick="document.getElementById('roster-ocr-input').click()" style="background:var(--bg-card); border: 1px dashed var(--accent-p); color: var(--accent-p);" title="Scan screenshot for names">📷 Scan Image</button>
           
-          <button class="btn-primary" onclick="appendToRoster()" style="flex:2;">➕ Add Player(s)</button>
+          <label style="display:flex;align-items:center;font-size:0.75rem;color:var(--text-dim);font-weight:700;cursor:pointer;" title="Filters out Display Names and only extracts Usernames">
+             <input type="checkbox" id="ocr-user-only" checked style="margin-right:6px;width:14px;height:14px;accent-color:var(--accent-p);"> Usernames Only
+          </label>
+          
+          <button class="btn-primary" onclick="appendToRoster()" style="flex:1;">➕ Add Player(s)</button>
           <button class="btn-primary" onclick="initRoster()" style="flex:1; background: var(--bg-card); border: 1px solid var(--border-dim); color: var(--text-dim);" title="Wipe out everything and replace with new names">⚠️ Overwrite</button>
         </div>
-        <button class="btn-primary" onclick="generateTrainingReport()" style="width:100%; background:var(--accent-t)">📊 Copy Summary Report</button>
+        <button class="btn-primary" onclick="generateTrainingReport()" style="width:100%;background:var(--accent-t)">📊 Copy Summary Report</button>
       </div>
       <div class="roster-list" id="roster-list">
         <div class="empty-state" id="roster-empty">

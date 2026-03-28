@@ -766,18 +766,33 @@ async function processRosterOCR(e) {
     const lines = ret.data.text.split('\n');
     let names = [];
     lines.forEach(l => {
+      // Clean leading digits and UI artifacts but preserve underscores since Roblox uses them
       let clean = l.replace(/^[0-9:\.]+$/, '').replace(/[\[\]\(\)\{\}|\\\/\@><]/g, '').trim();
-      let chunks = clean.split(/\s+/);
-      chunks.forEach(c => {
-        // Exclude UI garbage words and isolated digits
-        if (c.length > 2 && !c.toLowerCase().includes('roblox') && !c.toLowerCase().includes('chat') && !c.toLowerCase().includes('menu') && isNaN(c)) {
-          names.push(c);
-        }
-      });
+      
+      // Ignore known UI elements
+      if (clean.toLowerCase().includes('view leaderboard')) return;
+      if (clean.toLowerCase().includes('roblox')) return;
+      if (clean.toLowerCase().includes('chat')) return;
+      if (clean.toLowerCase().includes('menu')) return;
+
+      if (clean.length > 2 && isNaN(clean)) {
+        // Assume names are the bulk line, split to prevent huge spatial gaps, but keep chunks
+        let chunks = clean.split(/\s+/);
+        chunks.forEach(c => {
+          if (c.length > 2) names.push(c);
+        });
+      }
     });
 
+    const isUsernamesOnly = document.getElementById('ocr-user-only')?.checked;
+    if (isUsernamesOnly && names.length > 2) {
+      // The Roblox Leaderboard alternates Display Name then Username. 
+      // Usernames are perfectly on the odd indices (1, 3, 5, 7...)
+      names = names.filter((n, idx) => idx % 2 === 1);
+    }
+
     const ta = document.getElementById('roster-input');
-    // Remove duplicates to be clean
+    // Remove duplicates
     const unique = [...new Set(names)];
     ta.value += (ta.value ? '\n' : '') + unique.join('\n');
     showToast(`Extracted ${unique.length} potential names!`);
