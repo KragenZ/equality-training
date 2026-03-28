@@ -12,6 +12,7 @@ function switchTab(name) {
   if (name === 'roster') { renderRoster(); updateAnalytics(); }
   if (name === 'templates') renderTemplates();
   if (name === 'routine') renderRoutine();
+  if (name === 'announce') generateAnnouncePreview();
 }
 
 // ---- Toast ----
@@ -604,11 +605,86 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'Enter' && document.getElementById('custom-text') === document.activeElement) addCustomMessage();
 });
 
+// ---- Elite Pro: Announcer ----
+const ANN_STORE = 'equality_announcer_settings';
+
+function loadAnnounceSettings() {
+  const saved = JSON.parse(localStorage.getItem(ANN_STORE)) || {};
+  if (saved.host) document.getElementById('ann-host').value = saved.host;
+  if (saved.age) document.getElementById('ann-age').value = saved.age;
+  if (saved.weps) document.getElementById('ann-weps').value = saved.weps;
+  if (saved.guide) document.getElementById('ann-guide').value = saved.guide;
+}
+
+function saveAnnounceSettings() {
+  const settings = {
+    host:  document.getElementById('ann-host').value,
+    age:   document.getElementById('ann-age').value,
+    weps:  document.getElementById('ann-weps').value,
+    guide: document.getElementById('ann-guide').value
+  };
+  localStorage.setItem(ANN_STORE, JSON.stringify(settings));
+}
+
+function getAnnounceText() {
+  const time   = document.getElementById('ann-time').value.trim() || '10-30 Minutes';
+  const cohost = document.getElementById('ann-cohost').value.trim() || 'open for Scholar+';
+  const region = document.getElementById('ann-region').value.trim() || 'Vote in discord';
+  const plan   = document.getElementById('ann-plan').value.trim() || '2 FFA\'s, TDM OR GLADS';
+  
+  const host   = document.getElementById('ann-host').value.trim();
+  const age    = document.getElementById('ann-age').value.trim();
+  const weps   = document.getElementById('ann-weps').value.trim();
+  const guide  = document.getElementById('ann-guide').value.trim();
+
+  return `:equality: Training will commence in ${time} :equality:
+@Training Participant
+
+Host: (${host})
+Co-Host: (${cohost})
+┌──═━┈┈┈┈┈┈━═──┐
+Region: ${region}
+PTS is OFF
+2 strikes = DISMISSED!
+STS in arena safe-zone upon joining
+Training Plan: ${plan}
+STS - Shoulder to shoulder
+PTS - Permission to speak
+PTR - Permission to rejoin
+PTL - Permission to leave
+PTC - Permission to change
+└──═━┈┈┈┈┈┈━═──┘
+React if you will be attending
+(6+ reactions to start including mine, 10+ for early link/start.)
+
+Host age group: ${age}
+(so i can't see 16 below age group, tell me if your using alt)
+
+Banned weapons: ${weps}
+check ${guide} if your first time attending`;
+}
+
+function generateAnnouncePreview() {
+  const preview = document.getElementById('announce-preview');
+  if (preview) {
+    preview.textContent = getAnnounceText();
+  }
+}
+
+function copyAnnounce() {
+  const text = getAnnounceText();
+  copyText(text);
+}
+
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', () => {
   renderCustom();
   loadTheme();
-  // Persistent timer check
+  renderHistory();
+  loadRoutine();
+  updateAnalytics();
+  initVoidCanvas();
+  loadAnnounceSettings();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
 });
 
