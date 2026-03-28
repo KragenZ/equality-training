@@ -142,6 +142,23 @@ body {
   justify-content: flex-end;
 }
 
+/* ---- Pulse Stats ---- */
+.pulse-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-dim);
+  border-radius: 50px;
+  padding: 4px 16px;
+  margin: 0 20px;
+}
+.pulse-item { display: flex; align-items: center; gap: 10px; }
+.pulse-label { font-size: 0.6rem; font-weight: 900; color: var(--text-muted); letter-spacing: 0.05em; }
+.pulse-val { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 800; color: var(--accent-p); min-width: 40px; }
+.pulse-bar-bg { width: 60px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; }
+.pulse-bar-fill { height: 100%; background: var(--accent-p); box-shadow: 0 0 10px var(--accent-p); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
 /* ---- Timer Widget ---- */
 .timer-widget {
   background: rgba(255,255,255,0.03);
@@ -960,6 +977,44 @@ body {
 .history-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
 .history-title { font-size: 0.95rem; font-weight: 800; color: var(--accent-p); }
 .history-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; white-space: pre-line; }
+
+/* ---- Analytics Styles ---- */
+.analytics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  transition: var(--transition);
+}
+.metric-card:hover { border-color: var(--accent-p); transform: translateY(-3px); box-shadow: var(--shadow-glow); }
+.metric-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+.metric-val { font-size: 1.5rem; font-weight: 900; color: var(--text-primary); display: block; }
+.metric-desc { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
+
+.event-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.event-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eb-header { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: var(--text-dim); }
+.eb-track { height: 8px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; }
+.eb-fill { height: 100%; background: var(--accent-s); border-radius: 10px; transition: width 0.5s ease; width: 0; }
 
 /* ---- Routine Styles ---- */
 .routine-list {

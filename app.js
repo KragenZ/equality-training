@@ -9,7 +9,7 @@ function switchTab(name) {
   if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
   // When switching to events, always show selector
   if (name === 'events') closeEvent();
-  if (name === 'roster') renderRoster();
+  if (name === 'roster') { renderRoster(); updateAnalytics(); }
   if (name === 'templates') renderTemplates();
   if (name === 'routine') renderRoutine();
 }
@@ -697,6 +697,7 @@ function setRosterStatus(idx, status) {
   _roster[idx].status = status;
   saveRoster();
   renderRoster();
+  updateAnalytics(); 
 }
 
 function generateTrainingReport() {
@@ -785,11 +786,100 @@ function renderTemplates() {
   });
 }
 
+// ---- Elite Pro: Analytics ----
+let _eventStats = JSON.parse(localStorage.getItem('event_stats')) || {};
+let _currentEventStart = null;
+let _activeEventId = null;
+
+function updateAnalytics() {
+  // Survival Rate
+  const total = _roster.length;
+  const active = _roster.filter(p => p.status === 'active').length;
+  const rate = total > 0 ? Math.round((active / total) * 100) : 100;
+  
+  const headerVal = document.getElementById('stat-survival-header');
+  const headerBar = document.getElementById('stat-survival-bar');
+  const detailedVal = document.getElementById('stat-survival-detailed');
+  
+  if (headerVal) headerVal.textContent = rate + '%';
+  if (headerBar) headerBar.style.width = rate + '%';
+  if (detailedVal) detailedVal.textContent = rate + '%';
+
+  // Efficiency (Based on 1 hour goal)
+  const effVal = document.getElementById('stat-efficiency');
+  if (effVal) {
+    const goalSecs = 3600;
+    const currentEff = Math.max(0, 100 - Math.round((_seconds / goalSecs) * 50)); 
+    effVal.textContent = currentEff + '%';
+    effVal.style.color = currentEff < 50 ? '#ef4444' : (currentEff < 80 ? '#f59e0b' : 'var(--text-primary)');
+  }
+
+  renderEventBars();
+}
+
+function startEventTimer(eventId) {
+  stopEventTimer(); // Stop prev
+  _activeEventId = eventId;
+  _currentEventStart = Date.now();
+  console.log(`Analytics: Tracking ${eventId}`);
+}
+
+function stopEventTimer() {
+  if (_activeEventId && _currentEventStart) {
+    const elapsed = Math.floor((Date.now() - _currentEventStart) / 1000);
+    _eventStats[_activeEventId] = (_eventStats[_activeEventId] || 0) + elapsed;
+    saveEventStats();
+    _activeEventId = null;
+    _currentEventStart = null;
+    updateAnalytics();
+  }
+}
+
+function saveEventStats() {
+  localStorage.setItem('event_stats', JSON.stringify(_eventStats));
+}
+
+function renderEventBars() {
+  const container = document.getElementById('event-bars-list');
+  if (!container) return;
+  
+  const totalRecorded = Object.values(_eventStats).reduce((a, b) => a + b, 0) || 1;
+  
+  container.innerHTML = Object.entries(_eventStats).map(([id, secs]) => {
+    const name = id.toUpperCase();
+    const pct = Math.round((secs / totalRecorded) * 100);
+    const mins = Math.max(1, Math.round(secs / 60));
+    return `
+      <div class="event-bar-row">
+        <div class="eb-header">
+          <span>${name}</span>
+          <span>${mins}m (${pct}%)</span>
+        </div>
+        <div class="eb-track"><div class="eb-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Modify openEvent and closeEvent to hook into timers
+const originalOpenEvent = openEvent;
+openEvent = (id) => {
+  startEventTimer(id);
+  originalOpenEvent(id);
+};
+
+const originalCloseEvent = closeEvent;
+closeEvent = () => {
+  stopEventTimer();
+  originalCloseEvent();
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   renderCustom();
   loadTheme();
   renderHistory();
   loadRoutine();
+  updateAnalytics();
   if (localStorage.getItem('timer_running') === 'true') toggleTimer();
 });
 

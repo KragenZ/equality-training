@@ -24,7 +24,35 @@
 
   <header class="header">
     <div class="header-inner">
-    <!-- Brand -->
+      <div class="header-brand">
+        <div class="logo-container">
+          <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" stroke="url(#logo-grad)" stroke-width="2" />
+            <path d="M50 20V80M25 40L50 30L75 40M25 60L50 70L75 60" stroke="url(#logo-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M25 40V60M75 40V60" stroke="var(--accent-p)" stroke-width="2" />
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                <stop stop-color="var(--accent-p)" />
+                <stop offset="1" stop-color="var(--accent-s)" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1>Equality Training</h1>
+          <p class="tagline">One Shot!</p>
+        </div>
+      </div>
+      
+      <!-- Pulse Stats -->
+      <div class="pulse-stats" id="pulse-stats">
+        <div class="pulse-item">
+          <span class="pulse-label">SURVIVAL:</span>
+          <span id="stat-survival-header" class="pulse-val">100%</span>
+          <div class="pulse-bar-bg"><div id="stat-survival-bar" class="pulse-bar-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
       <div class="header-badge"><span class="pulse-dot"></span><span id="header-status">Training Mode</span></div>
     </div>
     
@@ -268,6 +296,29 @@
         </div>
         <div id="history-list" class="history-list">
            <div class="empty-state">No past sessions found. Try finishing a training!</div>
+        </div>
+      </div>
+
+      <!-- Session Metrics -->
+      <div id="analytics-section" class="analytics-section" style="margin-top:40px">
+        <div class="panel-header">
+           <h3 class="panel-subtitle">Session Metrics</h3>
+           <p class="panel-desc">Real-time performance and event duration.</p>
+        </div>
+        <div class="metrics-grid">
+           <div class="metric-card">
+              <span class="metric-label">Efficiency</span>
+              <span id="stat-efficiency" class="metric-val">100%</span>
+              <p class="metric-desc">Pace vs Expected Time</p>
+           </div>
+           <div class="metric-card">
+              <span class="metric-label">Survival Rate</span>
+              <span id="stat-survival-detailed" class="metric-val">100%</span>
+              <p class="metric-desc">Active Roster vs Failed</p>
+           </div>
+        </div>
+        <div class="event-bars" id="event-bars-list">
+           <!-- Dynamic Bars Here -->
         </div>
       </div>
     </section>
