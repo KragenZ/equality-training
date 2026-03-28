@@ -1256,8 +1256,25 @@ function addToRoutine() {
 
 function removeFromRoutine(idx) {
   _routine.splice(idx, 1);
+  if (_activeIndex === idx) _activeIndex = -1;
+  else if (_activeIndex > idx) _activeIndex--;
   saveRoutine();
   renderRoutine();
+  updatePhaseUI();
+}
+
+function moveRoutineItem(idx, dir) {
+  if (idx + dir < 0 || idx + dir >= _routine.length) return;
+  const temp = _routine[idx];
+  _routine[idx] = _routine[idx + dir];
+  _routine[idx + dir] = temp;
+  
+  if (_activeIndex === idx) _activeIndex = idx + dir;
+  else if (_activeIndex === idx + dir) _activeIndex = idx;
+  
+  saveRoutine();
+  renderRoutine();
+  updatePhaseUI();
 }
 
 function clearRoutine() {
@@ -1295,7 +1312,11 @@ function renderRoutine() {
     div.innerHTML = `
       <div class="routine-idx">${i + 1}</div>
       <div class="routine-name">${item.name}</div>
-      <button class="routine-remove" onclick="removeFromRoutine(${i})">✖</button>
+      <div class="routine-actions">
+        <button class="routine-move" onclick="moveRoutineItem(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Move Up">▲</button>
+        <button class="routine-move" onclick="moveRoutineItem(${i}, 1)" ${i === _routine.length - 1 ? 'disabled' : ''} title="Move Down">▼</button>
+        <button class="routine-remove" onclick="removeFromRoutine(${i})" title="Remove">✖</button>
+      </div>
     `;
     list.appendChild(div);
   });

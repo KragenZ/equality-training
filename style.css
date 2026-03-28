@@ -1112,10 +1112,11 @@ body {
 .routine-item:hover { border-color: var(--border-bright); transform: scale(1.02); }
 .routine-idx { opacity: 0.4; font-weight: 900; font-size: 0.9rem; min-width: 20px; }
 .routine-name { font-weight: 800; flex: 1; }
-.routine-remove {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+.routine-actions {
+  display: flex;
+  gap: 6px;
+}
+.routine-move, .routine-remove {
   width: 28px; height: 28px;
   border-radius: 50%;
   cursor: pointer;
@@ -1124,8 +1125,14 @@ body {
   justify-content: center;
   font-size: 0.7rem;
   transition: var(--transition);
+  border: 1px solid var(--border-dim);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-dim);
 }
-.routine-remove:hover { background: #ef4444; color: white; }
+.routine-move:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: var(--text-primary); border-color: var(--border-bright); }
+.routine-move:disabled { opacity: 0.2; cursor: not-allowed; }
+.routine-remove { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
+.routine-remove:hover { background: #ef4444; color: white; border-color: #ef4444; }
 
 /* ---- Toast ---- */
 .toast {
